@@ -1,4 +1,4 @@
-# LEGO Autóműhely
+# TudasJargany
 
 Egyszerű, színes Python/Tkinter játék gyerekeknek.
 

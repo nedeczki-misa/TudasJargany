@@ -1,4 +1,4 @@
-"""LEGO autóépítő és könnyű utcai vezetős játék gyerekeknek."""
+"""TudasJargany autóépítő és könnyű utcai vezetős játék gyerekeknek."""
 
 from __future__ import annotations
 
@@ -12,15 +12,15 @@ from math_tasks import MathTask, MathTaskGenerator
 
 BG = "#EAF7FF"
 INK = "#183153"
-LEGO_RED = "#E53935"
-LEGO_BLUE = "#1976D2"
-LEGO_YELLOW = "#FFD43B"
-LEGO_GREEN = "#35A853"
+BRICK_RED = "#E53935"
+BRICK_BLUE = "#1976D2"
+BRICK_YELLOW = "#FFD43B"
+BRICK_GREEN = "#35A853"
 BASE_ROAD_SPEED = 6.5
 SPEED_STEP = 1.6
 
 CAR_COLORS = {
-    "PIROS": LEGO_RED,
+    "PIROS": BRICK_RED,
     "KÉK": "#1565C0",
     "ZÖLD": "#2EAD58",
     "NARANCS": "#F57C00",
@@ -58,10 +58,10 @@ class Part:
     placed: bool = False
 
 
-class LegoCarGame(tk.Tk):
+class TudasJarganyGame(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
-        self.title("LEGO Autóműhely")
+        self.title("TudasJargany")
         self.geometry("1050x740")
         self.minsize(900, 650)
         self.configure(bg=BG)
@@ -72,7 +72,7 @@ class LegoCarGame(tk.Tk):
         self.animation_job: str | None = None
         self.assembly_run = 0
         self.auto_assembling = False
-        self.car_color = LEGO_RED
+        self.car_color = BRICK_RED
         self.car_style = tk.StringVar(value=CAR_STYLES[0])
         self.color_boxes: list[tuple[float, float, float, float, str, str]] = []
         self.parts = self._make_parts()
@@ -107,23 +107,23 @@ class LegoCarGame(tk.Tk):
     @staticmethod
     def _make_parts() -> list[Part]:
         return [
-            Part("AUTÓ ALAPJA", "brick", LEGO_RED, 285, 78, 90, -142, 292),
-            Part("KÉK TETŐ", "cabin", LEGO_BLUE, 145, 76, 178, -55, 216),
-            Part("SÁRGA LÁMPA", "light", LEGO_YELLOW, 38, 28, 268, 143, 316, -1),
-            Part("ZÖLD LÖKHÁRÍTÓ", "bumper", LEGO_GREEN, 50, 25, 268, -192, 338, 1),
+            Part("AUTÓ ALAPJA", "brick", BRICK_RED, 285, 78, 90, -142, 292),
+            Part("KÉK TETŐ", "cabin", BRICK_BLUE, 145, 76, 178, -55, 216),
+            Part("SÁRGA LÁMPA", "light", BRICK_YELLOW, 38, 28, 268, 143, 316, -1),
+            Part("ZÖLD LÖKHÁRÍTÓ", "bumper", BRICK_GREEN, 50, 25, 268, -192, 338, 1),
             Part("BAL KERÉK", "wheel", "#263238", 67, 67, 307, -102, 344, -1),
             Part("JOBB KERÉK", "wheel", "#263238", 67, 67, 307, 72, 344, 1),
             Part("LÉGTERELŐ", "spoiler", "#F57C00", 82, 25, 410, -162, 267, -1, False),
             Part("VONÓHOROG", "hitch", "#546E7A", 58, 25, 410, -247, 350, 1, False),
             Part("SZIRÉNA", "siren", "#1976D2", 62, 27, 451, -53, 186, -1, False),
-            Part("TAXIJEL", "taxi", LEGO_YELLOW, 58, 29, 451, 31, 184, 1, False),
+            Part("TAXIJEL", "taxi", BRICK_YELLOW, 58, 29, 451, 31, 184, 1, False),
         ]
 
     def _build_window(self) -> None:
         header = tk.Frame(self, bg="#1565C0", padx=20, pady=12)
         header.pack(fill="x")
         tk.Label(
-            header, text="LEGO AUTÓMŰHELY", font=("Arial", 23, "bold"),
+            header, text="TudasJargany", font=("Arial", 23, "bold"),
             bg="#1565C0", fg="white"
         ).pack(side="left")
         self.header_text = tk.Label(
@@ -142,7 +142,7 @@ class LegoCarGame(tk.Tk):
             command=lambda _value: self._draw()
         )
         style_menu.configure(
-            font=("Arial", 10, "bold"), bg=LEGO_YELLOW, fg=INK,
+            font=("Arial", 10, "bold"), bg=BRICK_YELLOW, fg=INK,
             activebackground="#FFE47A", relief="flat", width=13,
             highlightthickness=0, cursor="hand2"
         )
@@ -160,8 +160,8 @@ class LegoCarGame(tk.Tk):
         self.controls.pack(fill="x")
         self.controls.pack_propagate(False)
 
-        self.left_button = self._button("◀  BALRA", lambda: self._change_lane(-1), LEGO_YELLOW)
-        self.right_button = self._button("JOBBRA  ▶", lambda: self._change_lane(1), LEGO_YELLOW)
+        self.left_button = self._button("◀  BALRA", lambda: self._change_lane(-1), BRICK_YELLOW)
+        self.right_button = self._button("JOBBRA  ▶", lambda: self._change_lane(1), BRICK_YELLOW)
         self.back_button = self._button("↻  ELÖLRŐL", self._reset_build, "#E1F0F8", size=11)
         self.back_button.pack(side="left")
         self.auto_button = self._button(
@@ -171,7 +171,7 @@ class LegoCarGame(tk.Tk):
         self.auto_button.pack(side="left", padx=(9, 0))
 
         self.status = tk.Label(
-            self.controls, text="Húzd a LEGO elemeket a szaggatott helyükre!",
+            self.controls, text="Húzd a építőkockákat a szaggatott helyükre!",
             font=("Arial", 12, "bold"), bg="white", fg=INK
         )
         self.status.pack(side="left", expand=True, padx=14)
@@ -188,7 +188,7 @@ class LegoCarGame(tk.Tk):
     def _button(self, text: str, command, color: str, size: int = 12) -> tk.Button:
         return tk.Button(
             self.controls, text=text, command=command, font=("Arial", size, "bold"),
-            bg=color, fg=INK if color != LEGO_GREEN else "white", relief="flat",
+            bg=color, fg=INK if color != BRICK_GREEN else "white", relief="flat",
             padx=18, pady=8, cursor="hand2"
         )
 
@@ -236,7 +236,7 @@ class LegoCarGame(tk.Tk):
             part.x = self._tray_x(part)
             part.y = part.tray_y
         self.header_text.configure(text="Építsd meg, aztán irány az utca!")
-        self.status.configure(text="Húzd a LEGO elemeket a szaggatott helyükre!", fg=INK)
+        self.status.configure(text="Húzd a építőkockákat a szaggatott helyükre!", fg=INK)
         self.start_button.configure(state="disabled", bg="#B9C8D0")
         self.auto_button.configure(state="normal")
         self._show_build_controls()
@@ -378,7 +378,7 @@ class LegoCarGame(tk.Tk):
                 )
                 self.canvas.create_oval(
                     x + 27, y + 27, x + part.width - 27, y + part.height - 27,
-                    fill=LEGO_YELLOW, outline="", tags=tag
+                    fill=BRICK_YELLOW, outline="", tags=tag
                 )
         elif part.kind == "spoiler":
             if ghost:
@@ -524,7 +524,7 @@ class LegoCarGame(tk.Tk):
 
     @staticmethod
     def _lighter(color: str) -> str:
-        """Világosabb árnyalat a LEGO bütykökhöz."""
+        """Világosabb árnyalat a építőkocka bütykeihez."""
         if len(color) != 7 or not color.startswith("#"):
             return color
         red, green, blue = (int(color[i:i + 2], 16) for i in (1, 3, 5))
@@ -591,7 +591,7 @@ class LegoCarGame(tk.Tk):
                     text="Minden kötelező elem kész! Extrákat még felszerelhetsz.",
                     fg="#238636",
                 )
-                self.start_button.configure(state="normal", bg=LEGO_GREEN, activebackground="#55C16B", fg="white")
+                self.start_button.configure(state="normal", bg=BRICK_GREEN, activebackground="#55C16B", fg="white")
                 self.auto_button.configure(state="disabled")
         else:
             part.x, part.y = self._tray_x(part), part.tray_y
@@ -624,7 +624,7 @@ class LegoCarGame(tk.Tk):
                 fg="#238636",
             )
             self.start_button.configure(
-                state="normal", bg=LEGO_GREEN, activebackground="#55C16B", fg="white"
+                state="normal", bg=BRICK_GREEN, activebackground="#55C16B", fg="white"
             )
             self._draw_workshop()
             self.bell()
@@ -909,7 +909,7 @@ class LegoCarGame(tk.Tk):
             self._cancel_math_timer()
             for button in buttons:
                 button.configure(state="disabled")
-            clicked.configure(bg=LEGO_GREEN, disabledforeground="white")
+            clicked.configure(bg=BRICK_GREEN, disabledforeground="white")
             if self.challenge_reward:
                 self._add_stars(self.challenge_reward)
                 reward_note = f"  +{self.challenge_reward} csillag!"
@@ -1023,7 +1023,7 @@ class LegoCarGame(tk.Tk):
         width, height = self.canvas.winfo_width(), self.canvas.winfo_height()
         left, right = self._road_edges()
         self.canvas.create_rectangle(0, 0, width, height, fill="#8DD8FF", outline="")
-        self.canvas.create_oval(width - 125, 25, width - 55, 95, fill=LEGO_YELLOW, outline="")
+        self.canvas.create_oval(width - 125, 25, width - 55, 95, fill=BRICK_YELLOW, outline="")
         self.canvas.create_rectangle(0, 105, width, height, fill="#69C56B", outline="")
         self._draw_houses(left, right)
         self.canvas.create_polygon(left, 0, right, 0, right, height, left, height, fill="#4C5560", outline="")
@@ -1103,7 +1103,7 @@ class LegoCarGame(tk.Tk):
             self.canvas.create_rectangle(x - 48, y - 70, x + 48, y + 70, fill=self.car_color, outline="#4B2630", width=3)
             cabin = (x - 38, y - 25, x + 38, y + 30)
         cx1, cy1, cx2, cy2 = cabin
-        self.canvas.create_rectangle(cx1, cy1, cx2, cy2, fill=LEGO_BLUE, outline="#0D4775", width=3)
+        self.canvas.create_rectangle(cx1, cy1, cx2, cy2, fill=BRICK_BLUE, outline="#0D4775", width=3)
         self.canvas.create_rectangle(cx1 + 9, cy1 + 9, cx2 - 9, cy2 - 9, fill="#BDEBFF", outline="")
         for sx in (-30, 0, 30):
             self.canvas.create_oval(x + sx - 8, y + 47, x + sx + 8, y + 58, fill="#FF7773", outline="#7A1414")
@@ -1115,10 +1115,10 @@ class LegoCarGame(tk.Tk):
             self.canvas.create_rectangle(x - 37, y - 38, x, y - 26, fill="#E53935", outline="white")
             self.canvas.create_rectangle(x, y - 38, x + 37, y - 26, fill="#2196F3", outline="white")
         if "taxi" in extras:
-            self.canvas.create_rectangle(x - 24, y + 21, x + 24, y + 36, fill=LEGO_YELLOW, outline="#5D4A00", width=2)
+            self.canvas.create_rectangle(x - 24, y + 21, x + 24, y + 36, fill=BRICK_YELLOW, outline="#5D4A00", width=2)
             self.canvas.create_text(x, y + 29, text="TAXI", font=("Arial", 7, "bold"), fill=INK)
-        self.canvas.create_oval(x - 37, y - 62, x - 18, y - 43, fill=LEGO_YELLOW, outline="#A47A00")
-        self.canvas.create_oval(x + 18, y - 62, x + 37, y - 43, fill=LEGO_YELLOW, outline="#A47A00")
+        self.canvas.create_oval(x - 37, y - 62, x - 18, y - 43, fill=BRICK_YELLOW, outline="#A47A00")
+        self.canvas.create_oval(x + 18, y - 62, x + 37, y - 43, fill=BRICK_YELLOW, outline="#A47A00")
 
     def _draw_star(self, x: float, y: float, radius: float) -> None:
         points = []
@@ -1126,7 +1126,7 @@ class LegoCarGame(tk.Tk):
             angle = -math.pi / 2 + index * math.pi / 5
             r = radius if index % 2 == 0 else radius * 0.43
             points.extend((x + math.cos(angle) * r, y + math.sin(angle) * r))
-        self.canvas.create_polygon(points, fill=LEGO_YELLOW, outline="#E09B00", width=3)
+        self.canvas.create_polygon(points, fill=BRICK_YELLOW, outline="#E09B00", width=3)
 
     def _draw_cone(self, x: float, y: float) -> None:
         self.canvas.create_polygon(x, y - 31, x - 25, y + 28, x + 25, y + 28, fill="#FF6D00", outline="#8D3B00", width=3)
@@ -1183,7 +1183,7 @@ class LegoCarGame(tk.Tk):
         tk.Label(popup, text=f"Összegyűjtöttél {self.score} csillagot! ★", font=("Arial", 15, "bold"), bg="#FFF5CC", fg=INK).pack(pady=8)
         tk.Button(
             popup, text="VEZETEK MÉG!", command=lambda: (popup.destroy(), self._start_driving()),
-            font=("Arial", 12, "bold"), bg=LEGO_GREEN, fg="white", relief="flat", padx=20, pady=9, cursor="hand2"
+            font=("Arial", 12, "bold"), bg=BRICK_GREEN, fg="white", relief="flat", padx=20, pady=9, cursor="hand2"
         ).pack(pady=6)
         tk.Button(
             popup, text="VISSZA A MŰHELYBE", command=lambda: (popup.destroy(), self._reset_build()),
@@ -1192,4 +1192,4 @@ class LegoCarGame(tk.Tk):
 
 
 if __name__ == "__main__":
-    LegoCarGame().mainloop()
+    TudasJarganyGame().mainloop()

@@ -1,16 +1,15 @@
-# TudásJárgány – AI fejlesztési útmutató
+# TudasJargany – AI fejlesztési útmutató
 
 Ez a dokumentum a játék későbbi, AI segítségével történő továbbfejlesztéséhez készült. A benne szereplő szabályokat tekintsd a projekt jelenlegi termékleírásának.
 
 ## Alapkoncepció
 
-- Javasolt végleges név: **TudásJárgány**
+- Végleges név: **TudasJargany**
 - Szlogen: **Építs, vezess, tanulj!**
 - Célcsoport: elsősorban 2. osztályos, körülbelül 7–8 éves gyerekek.
-- A játékos LEGO-szerű elemekből összeállít egy autót, majd négysávos úton vezet vele.
+- A játékos építőkockákból összeállít egy autót, majd négysávos úton vezet vele.
 - A vezetés és az oktatási feladatok egy közös jutalmazási rendszerhez kapcsolódnak.
 - A játék később ne csak matematikát, hanem magyar nyelvet, nyelvtant, olvasást, irodalmat és más 2. osztályos tananyagot is gyakoroltasson.
-- A jelenlegi ablakcím még „LEGO Autóműhely”; ezt egy későbbi arculati körben érdemes TudásJárgányra cserélni.
 
 ## Jelenlegi technológia és indítás
 
@@ -133,7 +132,7 @@ Lehetséges 2. osztályos feladattípusok – a konkrét tananyagot pedagógussa
 
 ## Ajánlott következő fejlesztési lépések
 
-1. A játék címének és fejlécének átnevezése **TudásJárgányra**.
+1. Egységes kezdőképernyő és arculat kialakítása a **TudasJargany** névhez.
 2. A tantárgy kiválasztása a játék elején: vegyes, matematika, magyar vagy olvasás/irodalom.
 3. A közös `LearningTask` modell és `TaskManager` bevezetése.
 4. A matematika kódjának áthelyezése az új feladatmodul-rendszerbe változatlan játékszabályok mellett.
