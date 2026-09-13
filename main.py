@@ -197,7 +197,11 @@ class TudasJarganyGame(tk.Tk):
         return min(width - 330, width * 0.47)
 
     def _target(self, part: Part) -> tuple[float, float]:
-        return self._car_center() + part.target_dx, part.target_y
+        horizontal_adjustment = 0
+        # A pickup kabinja és tetőextrái előrébb kerülnek, így nem lógnak a platóra.
+        if self.car_style.get() == "PICKUP" and part.kind in ("cabin", "siren", "taxi"):
+            horizontal_adjustment = 50
+        return self._car_center() + part.target_dx + horizontal_adjustment, part.target_y
 
     def _tray_x(self, part: Part) -> float:
         tray_left = max(565, self.canvas.winfo_width() - 335)
@@ -440,6 +444,8 @@ class TudasJarganyGame(tk.Tk):
                     x + part.width / 2, y + part.height / 2 + 2,
                     text="TAXI", font=("Arial", 8, "bold"), fill=INK, tags=tag
                 )
+        elif part.kind == "cabin":
+            self._draw_cabin_part(part, x, y, ghost, outline, fill, dash, tag)
         elif part.kind == "brick":
             self._draw_body_part(part, x, y, ghost, outline, fill, dash, tag)
         else:
@@ -456,11 +462,7 @@ class TudasJarganyGame(tk.Tk):
                         sx - 10, y - 6, sx + 10, y + 7,
                         fill=self._lighter(part.color), outline="#1A2633", width=1, tags=tag
                     )
-                if part.kind == "cabin":
-                    self.canvas.create_rectangle(
-                        x + 20, y + 19, x + part.width - 20, y + part.height - 12,
-                        fill="#BDEBFF", outline="#0D4775", width=2, tags=tag
-                    )
+
 
         if ghost:
             self.canvas.create_text(
@@ -476,55 +478,119 @@ class TudasJarganyGame(tk.Tk):
                 fill=label_fill, tags=tag
             )
 
+    def _draw_cabin_part(
+        self, part: Part, x: float, y: float, ghost: bool,
+        outline: str, fill: str, dash, tag: str
+    ) -> None:
+        """Formához illő tetőt és osztott ablakokat rajzol oldalnézetben."""
+        style = self.car_style.get()
+        w, h = part.width, part.height
+        if style == "SPORTAUTÓ":
+            points = (x + 5, y + h, x + 32, y + 8, x + w - 38, y + 8, x + w, y + h)
+        elif style == "TEREPJÁRÓ":
+            points = (x, y + h, x + 8, y + 4, x + w - 8, y + 4, x + w, y + h)
+        elif style == "PICKUP":
+            points = (x, y + h, x + 12, y + 6, x + w - 42, y + 6, x + w, y + h)
+        else:
+            points = (x, y + h, x + 20, y + 7, x + w - 25, y + 7, x + w, y + h)
+        self.canvas.create_polygon(
+            points, fill=fill, outline=outline, width=3, dash=dash, tags=tag
+        )
+        if ghost:
+            return
+
+        margin = 15 if style != "SPORTAUTÓ" else 23
+        top = y + 15
+        bottom = y + h - 11
+        left = x + margin
+        right = x + w - margin
+        pillar = x + w * (0.46 if style == "PICKUP" else 0.51)
+        self.canvas.create_polygon(
+            left, bottom, left + 10, top, pillar - 5, top, pillar - 5, bottom,
+            fill="#BDEBFF", outline="#0D4775", width=2, tags=tag
+        )
+        self.canvas.create_polygon(
+            pillar + 5, top, right - 13, top, right, bottom, pillar + 5, bottom,
+            fill="#A8DDF2", outline="#0D4775", width=2, tags=tag
+        )
+        self.canvas.create_rectangle(
+            pillar - 5, top - 1, pillar + 5, bottom + 1,
+            fill="#173A59", outline="", tags=tag
+        )
+        for stud_x in (x + 25, x + w - 25):
+            self.canvas.create_oval(
+                stud_x - 9, y - 5, stud_x + 9, y + 7,
+                fill=self._lighter(part.color), outline="#1A2633", tags=tag
+            )
+
     def _draw_body_part(
         self, part: Part, x: float, y: float, ghost: bool,
         outline: str, fill: str, dash, tag: str
     ) -> None:
-        """A választott autóformához igazítja a fő karosszériaelemet."""
+        """Részletes, a választott autóformához igazodó karosszériát rajzol."""
         style = self.car_style.get()
         w, h = part.width, part.height
         if style == "SPORTAUTÓ":
             points = (x, y + 31, x + 42, y + 10, x + w - 48, y + 10,
                       x + w, y + 35, x + w - 8, y + h, x + 8, y + h)
             self.canvas.create_polygon(
-                points, fill=fill, outline=outline, width=3,
-                dash=dash, tags=tag
+                points, fill=fill, outline=outline, width=3, dash=dash, tags=tag
             )
         elif style == "PICKUP":
-            points = (x, y + 18, x + 112, y + 18, x + 143, y,
-                      x + w - 8, y, x + w, y + h, x, y + h)
+            points = (x, y + 14, x + 108, y + 14, x + 133, y + 2,
+                      x + w - 10, y + 2, x + w, y + 29,
+                      x + w - 7, y + h, x, y + h)
             self.canvas.create_polygon(
-                points, fill=fill, outline=outline, width=3,
-                dash=dash, tags=tag
+                points, fill=fill, outline=outline, width=3, dash=dash, tags=tag
             )
             if not ghost:
                 self.canvas.create_rectangle(
-                    x + 12, y + 29, x + 105, y + h - 10,
+                    x + 10, y + 25, x + 102, y + h - 10,
                     fill=self._lighter(part.color), outline=outline, width=2, tags=tag
                 )
+                self.canvas.create_line(
+                    x + 108, y + 15, x + 108, y + h - 7,
+                    fill=outline, width=3, tags=tag
+                )
+        elif style == "VÁROSI AUTÓ":
+            points = (x, y + 22, x + 27, y + 8, x + w - 42, y + 8,
+                      x + w, y + 27, x + w - 4, y + h, x + 4, y + h)
+            self.canvas.create_polygon(
+                points, fill=fill, outline=outline, width=3, dash=dash, tags=tag
+            )
         else:
             self.canvas.create_rectangle(
                 x, y, x + w, y + h, fill=fill,
-                outline=outline, width=4 if style == "TEREPJÁRÓ" else 3,
-                dash=dash, tags=tag
+                outline=outline, width=4, dash=dash, tags=tag
             )
-            if style == "TEREPJÁRÓ" and not ghost:
+            if not ghost:
                 self.canvas.create_rectangle(
                     x + 8, y + h - 20, x + w - 8, y + h - 7,
                     fill="#37474F", outline="", tags=tag
                 )
         if not ghost:
-            studs = 6
-            for index in range(studs):
-                sx = x + w * (index + 0.5) / studs
+            door_x = x + (176 if style == "PICKUP" else 151)
+            self.canvas.create_line(
+                door_x, y + 17, door_x, y + h - 7,
+                fill="#263238", width=2, tags=tag
+            )
+            self.canvas.create_rectangle(
+                door_x + 12, y + 29, door_x + 34, y + 34,
+                fill="#ECEFF1", outline="#263238", tags=tag
+            )
+            self.canvas.create_rectangle(
+                x + w - 12, y + 32, x + w, y + h - 13,
+                fill="#263238", outline="", tags=tag
+            )
+            for index in range(6):
+                sx = x + w * (index + 0.5) / 6
                 self.canvas.create_oval(
                     sx - 10, y - 6, sx + 10, y + 7,
                     fill=self._lighter(part.color), outline="#1A2633", width=1, tags=tag
                 )
-
     @staticmethod
     def _lighter(color: str) -> str:
-        """Világosabb árnyalat a építőkocka bütykeihez."""
+        """Világosabb árnyalat az építőkocka bütykeihez."""
         if len(color) != 7 or not color.startswith("#"):
             return color
         red, green, blue = (int(color[i:i + 2], 16) for i in (1, 3, 5))
