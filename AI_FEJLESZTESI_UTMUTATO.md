@@ -23,6 +23,9 @@ Ez a dokumentum a játék későbbi, AI segítségével történő továbbfejles
 
 - `main.py`: a teljes felület, az autóépítés, a vezetés, az akadályok, a pontozás és a feladatablakok.
 - `math_tasks.py`: összeadásos és kivonásos feladatok generátora.
+- `learning_tasks.py`: közös `LearningTask` feladatmodell és angol szókincsgenerátor.
+- `task_manager.py`: a matek- és angolfeladatok szigorú váltását kezeli.
+- `test_learning_tasks.py`: angol és többtantárgyas feladatok automatikus tesztjei.
 - `test_math_tasks.py`: a feladatgenerátor automatikus tesztjei.
 - `README.md`: játékosi használati útmutató.
 - `start.bat`: egyszerű Windows-indító.
@@ -74,6 +77,7 @@ Az extrák nélkül is el lehet indulni. Vezetés közben csak a ténylegesen fe
 ## Feladat- és jutalmazási szabályok
 
 - Minden egyes feladatra 60 másodperc áll rendelkezésre.
+- A feladatok minden új kérdésnél felváltva érkeznek: matek, angol, matek, angol.
 - Az utolsó 10 másodpercben a visszaszámláló piros.
 - Ütközéshez tartozó helyes válasz: nincs életvesztés, és nem jár csillag.
 - Ütközéshez tartozó hibás válasz: egy élet levonása, majd újrapróbálható a feladat, ha maradt élet.
@@ -93,31 +97,29 @@ Az extrák nélkül is el lehet indulni. Vezetés közben csak a ténylegesen fe
   - hiányzó műveleti jel: `8 ? 6 = 14`.
 - A válaszokat nagy, egérrel kattintható gombokkal kell megadni.
 
-## Tervezett többtantárgyas bővítés
+## Többtantárgyas feladatrendszer
 
-A következő nagy fejlesztésben a feladatablak ne közvetlenül a `MathTaskGenerator` osztálytól függjön. Legyen közös feladatmodell és több cserélhető feladatforrás, például:
+A feladatablak a közös `LearningTask` modellt használja, ezért nem függ közvetlenül a matematikai generátortól:
 
 ```python
 @dataclass(frozen=True)
 class LearningTask:
-    subject: str
     prompt: str
-    choices: tuple[str, ...]
     answer: str
+    choices: tuple[str, ...]
     explanation: str
-    difficulty: int
+    subject: str
 ```
 
-Javasolt modulok:
+A jelenlegi modulok:
 
-- `tasks/base.py`: közös `LearningTask` modell és generátorprotokoll;
-- `tasks/math.py`: a jelenlegi matematikai feladatok;
-- `tasks/hungarian.py`: helyesírási és nyelvtani feladatok;
-- `tasks/reading.py`: rövid olvasási és szövegértési feladatok;
-- `tasks/literature.py`: mesékhez, versekhez és történetekhez kapcsolódó feladatok;
-- `task_manager.py`: tantárgy-, nehézség- és ismétléskezelés.
+- `math_tasks.py`: 30-as számkörbeli összeadás és kivonás;
+- `learning_tasks.py`: angol–magyar alap szókincs;
+- `task_manager.py`: szigorú `MATEK → ANGOL` váltás.
 
-Lehetséges 2. osztályos feladattípusok – a konkrét tananyagot pedagógussal érdemes ellenőrizni:
+Új tantárgy hozzáadásakor készíts egy `next_task()` metódusú generátort, amely `LearningTask` objektumot ad vissza, majd regisztráld a `TaskManager` tantárgysorrendjében. Így később a magyar nyelvtan, irodalom vagy szövegértés a feladatablak átírása nélkül bővíthető.
+
+## Lehetséges 2. osztályos feladattípusok – a konkrét tananyagot pedagógussal érdemes ellenőrizni:
 
 - szótagolás és szótagszám;
 - magánhangzó/mássalhangzó felismerése;
@@ -134,10 +136,10 @@ Lehetséges 2. osztályos feladattípusok – a konkrét tananyagot pedagógussa
 ## Ajánlott következő fejlesztési lépések
 
 1. Egységes kezdőképernyő és arculat kialakítása a **TudasJargany** névhez.
-2. A tantárgy kiválasztása a játék elején: vegyes, matematika, magyar vagy olvasás/irodalom.
-3. A közös `LearningTask` modell és `TaskManager` bevezetése.
-4. A matematika kódjának áthelyezése az új feladatmodul-rendszerbe változatlan játékszabályok mellett.
-5. Magyar és olvasási feladatbank készítése külön tesztekkel.
+2. A tantárgy kiválasztása a játék elején: vegyes, matematika, angol, magyar vagy olvasás/irodalom.
+3. Angol szókincs bővítése témakörök szerint (állatok, színek, család, iskola).
+4. Magyar és olvasási feladatgenerátor beillesztése a `TaskManager` váltási sorrendjébe.
+5. Tantárgyválasztó beállítás készítése: vegyes, csak matematika, csak angol vagy későbbi tantárgyak.
 6. Nehézségi szintek és szülői/pedagógusi beállítások.
 7. Eredmények mentése helyben: gyakorolt témák, helyes válaszok, gyakori hibák.
 

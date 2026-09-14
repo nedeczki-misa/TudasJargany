@@ -3,19 +3,14 @@
 from __future__ import annotations
 
 import random
+from learning_tasks import LearningTask
 from collections import deque
-from dataclasses import dataclass
 
 
 MAX_NUMBER = 30
 
-
-@dataclass(frozen=True)
-class MathTask:
-    prompt: str
-    answer: str
-    choices: tuple[str, ...]
-    explanation: str
+# Visszafele kompatibilis nev a korabbi tesztekhez es hivasokhoz.
+MathTask = LearningTask
 
 
 class MathTaskGenerator:

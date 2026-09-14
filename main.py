@@ -13,7 +13,8 @@ try:
 except ImportError:  # Nem Windows rendszeren a Tk csengője lesz a tartalék.
     winsound = None
 
-from math_tasks import MathTask, MathTaskGenerator
+from learning_tasks import LearningTask
+from task_manager import TaskManager
 
 
 BG = "#EAF7FF"
@@ -94,14 +95,16 @@ class TudasJarganyGame(tk.Tk):
         self.pending_life_challenges = 0
         self.message = ""
         self.message_frames = 0
-        self.math_tasks = MathTaskGenerator()
+        self.task_manager = TaskManager()
         self.math_active = False
         self.math_popup: tk.Toplevel | None = None
-        self.current_math_task: MathTask | None = None
+        self.current_task: LearningTask | None = None
+        # A korabbi nev megmarad, hogy a regi tesztek es kiegeszitok mukodjenek.
+        self.current_math_task: LearningTask | None = None
         self.challenge_tasks_left = 0
         self.challenge_reward = 0
-        self.challenge_title = "MATEK-SZERVIZ"
-        self.challenge_reason = "Az akadály megállított. Rakd ki a hiányzó részt!"
+        self.challenge_title = "TUDÁS-SZERVIZ"
+        self.challenge_reason = "Az akadály megállított. Válaszd ki a helyes választ!"
         self.challenge_is_collision = False
         self.challenge_life_reward = False
         self.challenge_life_granted = False
@@ -875,10 +878,10 @@ class TudasJarganyGame(tk.Tk):
                 "closure": "Behajtottál a lezárt sávba!",
             }
             task_count = 3 if hit_obstacle == "closure" else 1
-            self._begin_math_challenge(
+            self._begin_learning_challenge(
                 count=task_count,
                 reward=0,
-                title="3 FELADATOS ÚTJAVÍTÁS" if task_count == 3 else "MATEK-SZERVIZ",
+                title="3 FELADATOS ÚTJAVÍTÁS" if task_count == 3 else "TUDÁS-SZERVIZ",
                 reason=obstacle_names[hit_obstacle],
                 is_collision=True,
                 delay=250,
@@ -892,7 +895,7 @@ class TudasJarganyGame(tk.Tk):
         else:
             self.animation_job = self.after(32, self._drive_tick)
 
-    def _begin_math_challenge(
+    def _begin_learning_challenge(
         self,
         count: int,
         reward: int,
@@ -911,13 +914,13 @@ class TudasJarganyGame(tk.Tk):
         self.challenge_is_collision = is_collision
         self.challenge_life_reward = life_reward
         self.challenge_life_granted = False
-        self.after(delay, self._show_math_task)
+        self.after(delay, self._show_learning_task)
 
     def _start_pending_life(self, delay: int = 0) -> None:
         if self.pending_life_challenges <= 0:
             return
         self.pending_life_challenges -= 1
-        self._begin_math_challenge(
+        self._begin_learning_challenge(
             count=1,
             reward=0,
             title="30 PONTOS ÉLETBÓNUSZ!",
@@ -930,7 +933,7 @@ class TudasJarganyGame(tk.Tk):
         if self.pending_bonus_challenges <= 0:
             return
         self.pending_bonus_challenges -= 1
-        self._begin_math_challenge(
+        self._begin_learning_challenge(
             count=1,
             reward=2,
             title="10 CSILLAGOS BÓNUSZ!",
@@ -939,18 +942,20 @@ class TudasJarganyGame(tk.Tk):
             delay=delay,
         )
 
-    def _show_math_task(self) -> None:
-        """Megállítja a vezetést, és kattintható matekfeladatot mutat."""
+    def _show_learning_task(self) -> None:
+        """Megállítja a vezetést, és kattintható tanulási feladatot mutat."""
         if self.mode != "drive" or not self.math_active:
             return
         self._cancel_math_timer()
         self.task_seconds_left = 60
         self.task_resolved = False
-        task = self.math_tasks.next_task()
+        task = self.task_manager.next_task()
+        self.current_task = task
         self.current_math_task = task
+        task_title = f"{self.challenge_title} - {task.subject}"
         popup = tk.Toplevel(self)
         self.math_popup = popup
-        popup.title(self.challenge_title.title())
+        popup.title(task_title.title())
         popup.geometry("510x430")
         popup.resizable(False, False)
         popup.configure(bg="#FFF7D1")
@@ -962,7 +967,7 @@ class TudasJarganyGame(tk.Tk):
         popup.geometry(f"+{x}+{y}")
 
         tk.Label(
-            popup, text=f"🔧  {self.challenge_title}",
+            popup, text=f"🔧  {task_title}",
             font=("Arial", 21, "bold"), bg="#FFF7D1", fg="#1565C0"
         ).pack(pady=(24, 5))
         progress_text = ""
@@ -971,7 +976,7 @@ class TudasJarganyGame(tk.Tk):
             progress_text = f"  ({solved + 1}/3. feladat)"
         tk.Label(
             popup,
-            text=f"{self.challenge_reason}{progress_text}\nRakd ki a hiányzó részt!",
+            text=f"{self.challenge_reason}{progress_text}\nVálaszd ki a helyes választ!",
             font=("Arial", 12), bg="#FFF7D1", fg=INK
         ).pack(pady=(0, 8))
         timer_label = tk.Label(
@@ -1001,7 +1006,7 @@ class TudasJarganyGame(tk.Tk):
                 cursor="hand2"
             )
             button.configure(
-                command=lambda value=choice, widget=button: self._check_math_answer(
+                command=lambda value=choice, widget=button: self._check_learning_answer(
                     value, widget, buttons, feedback, task, popup
                 )
             )
@@ -1013,16 +1018,16 @@ class TudasJarganyGame(tk.Tk):
         )
         self.task_timer_job = self.after(
             1000,
-            lambda: self._tick_math_timer(popup, timer_label, buttons, feedback),
+            lambda: self._tick_task_timer(popup, timer_label, buttons, feedback),
         )
 
-    def _check_math_answer(
+    def _check_learning_answer(
         self,
         choice: str,
         clicked: tk.Button,
         buttons: list[tk.Button],
         feedback: tk.Label,
-        task: MathTask,
+        task: LearningTask,
         popup: tk.Toplevel,
     ) -> None:
         if self.task_resolved:
@@ -1050,7 +1055,7 @@ class TudasJarganyGame(tk.Tk):
                 text=f"Ügyes vagy!  {task.explanation}{reward_note}", fg="#238636"
             )
             self.bell()
-            self.after(1000, lambda: self._finish_math_task(popup, success=True))
+            self.after(1000, lambda: self._finish_learning_task(popup, success=True))
         else:
             clicked.configure(bg="#E55245")
             if self.challenge_is_collision:
@@ -1065,7 +1070,7 @@ class TudasJarganyGame(tk.Tk):
                     for button in buttons:
                         button.configure(state="disabled")
                     feedback.configure(text="Elfogytak az életek.", fg="#D14B3E")
-                    self.after(900, lambda: self._finish_math_task(popup, success=False))
+                    self.after(900, lambda: self._finish_learning_task(popup, success=False))
                     return
             else:
                 feedback.configure(
@@ -1088,7 +1093,7 @@ class TudasJarganyGame(tk.Tk):
                 pass
             self.task_timer_job = None
 
-    def _tick_math_timer(
+    def _tick_task_timer(
         self,
         popup: tk.Toplevel,
         timer_label: tk.Label,
@@ -1105,7 +1110,7 @@ class TudasJarganyGame(tk.Tk):
         if self.task_seconds_left > 0:
             self.task_timer_job = self.after(
                 1000,
-                lambda: self._tick_math_timer(popup, timer_label, buttons, feedback),
+                lambda: self._tick_task_timer(popup, timer_label, buttons, feedback),
             )
             return
 
@@ -1120,9 +1125,9 @@ class TudasJarganyGame(tk.Tk):
             feedback.configure(text="Lejárt az idő, az élet most nem töltődött vissza.", fg="#D14B3E")
         else:
             feedback.configure(text="Lejárt az idő, most nem jár bónuszcsillag.", fg="#D14B3E")
-        self.after(1300, lambda: self._finish_math_task(popup, success=False))
+        self.after(1300, lambda: self._finish_learning_task(popup, success=False))
 
-    def _finish_math_task(self, popup: tk.Toplevel, success: bool) -> None:
+    def _finish_learning_task(self, popup: tk.Toplevel, success: bool) -> None:
         self._cancel_math_timer()
         if popup.winfo_exists():
             popup.grab_release()
@@ -1132,7 +1137,7 @@ class TudasJarganyGame(tk.Tk):
             return
         self.challenge_tasks_left -= 1
         if self.challenge_tasks_left > 0 and self.lives > 0:
-            self.after(250, self._show_math_task)
+            self.after(250, self._show_learning_task)
             return
 
         self.math_active = False
