@@ -11,7 +11,7 @@ Egyszerű, színes Python/Tkinter játék gyerekeknek.
 5. Ha minden kötelező elem a helyén van, kattints az **INDULÁS!** gombra.
 6. Az utcán gyűjtsd össze a csillagokat, és kerüld ki az akadályokat.
 7. A műhely alsó sávjában kattints a **FELADATOK** gombra. A Matek alapból be van jelölve, az Angol kikapcsolva. Jelöld be az Angolt is, ha vegyes feladatokat szeretnél.
-8. Ha az autó akadálynak ütközik, megnyílik a **Tudás-szerviz**. Minden kérdésre 60 másodperc áll rendelkezésre. Helyes válasz után élet- és csillagváltozás nélkül folytatódik a vezetés.
+8. Ha az autó akadálynak ütközik, megnyílik a **Tudás-szerviz**. Minden kérdésre 30 másodperc áll rendelkezésre. Helyes válasz után élet- és csillagváltozás nélkül folytatódik a vezetés.
 
 A Matek alapértelmezett feladatként összeadást és kivonást gyakoroltat a 30-as számkörben. Ha az Angol is be van jelölve, alap angol–magyar szavak is érkeznek, például `apple` = alma vagy kutya = `dog`; ekkor a két tantárgy felváltva jelenik meg.
 
@@ -22,7 +22,7 @@ Angolfeladatnál húzd az egeret az angol szó fölé: a játék offline kimondj
 - Minden 10. csillag után külön bónusz tanulási feladat következik, amely 2 csillagot ér.
 - Minden 10. csillagnál egy fokozattal gyorsabb lesz az autó, és ekkor jelenik meg a bónuszfeladat is.
 - A pálya gyorsulását az `assets/sounds/speed_up.wav` hang jelzi.
-- Minden 30. pontnál külön, 60 másodperces tanulási feladat jelenik meg. Helyes válasszal egy élet tölthető vissza, legfeljebb háromig; ezen a mérföldkőn a szokásos +2 csillagos bónusz nem jár.
+- Minden 30. pontnál külön, 30 másodperces tanulási feladat jelenik meg. Helyes válasszal egy élet tölthető vissza, legfeljebb háromig; ezen a mérföldkőn a szokásos +2 csillagos bónusz nem jár.
 - Ütközéskor fékhang, majd bójánál könnyű, más járműnél vagy sávlezárásnál erősebb ütközési hang hallható.
 - A bóják, más autók és buszok mellett vadmotorosok is megjelennek; a motorosok cikázva sávot váltanak.
 - Induláskor motorhang szól; vezetés közben a **DUDÁLJ** gomb a kürtöt használja. Felszerelt rendőrségi szirénánál szirénahang is szól.

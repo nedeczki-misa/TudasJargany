@@ -27,6 +27,7 @@ BRICK_YELLOW = "#FFD43B"
 BRICK_GREEN = "#35A853"
 BASE_ROAD_SPEED = 6.5
 SPEED_STEP = 1.6
+TASK_TIME_LIMIT = 30
 SOUND_DIR = Path(__file__).with_name("assets") / "sounds"
 SOUND_FILES = {
     "engine_start": SOUND_DIR / "engine_start.wav",
@@ -129,7 +130,7 @@ class TudasJarganyGame(tk.Tk):
         self.challenge_life_reward = False
         self.challenge_life_granted = False
         self.task_timer_job: str | None = None
-        self.task_seconds_left = 60
+        self.task_seconds_left = TASK_TIME_LIMIT
         self.task_resolved = False
         self.speed_just_increased = False
         self.siren_running = False
@@ -1103,7 +1104,7 @@ class TudasJarganyGame(tk.Tk):
         if self.mode != "drive" or not self.math_active:
             return
         self._cancel_math_timer()
-        self.task_seconds_left = 60
+        self.task_seconds_left = TASK_TIME_LIMIT
         self.task_resolved = False
         task = self.task_manager.next_task()
         self.current_task = task
@@ -1136,7 +1137,7 @@ class TudasJarganyGame(tk.Tk):
             font=("Arial", 12), bg="#FFF7D1", fg=INK
         ).pack(pady=(0, 8))
         timer_label = tk.Label(
-            popup, text="⏱  60 másodperc",
+            popup, text=f"⏱  {TASK_TIME_LIMIT} másodperc",
             font=("Arial", 14, "bold"), bg="#FFF7D1", fg="#26734D"
         )
         timer_label.pack(pady=(0, 8))

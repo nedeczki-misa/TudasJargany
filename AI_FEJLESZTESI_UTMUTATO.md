@@ -79,7 +79,7 @@ Az extrák nélkül is el lehet indulni. Vezetés közben csak a ténylegesen fe
 
 ## Feladat- és jutalmazási szabályok
 
-- Minden egyes feladatra 60 másodperc áll rendelkezésre.
+- Minden egyes feladatra 30 másodperc áll rendelkezésre.
 - A műhely Feladatok menüjében alapból csak a Matek aktív; Angol bekapcsolásakor a kiválasztott tantárgyak felváltva érkeznek.
 - Az utolsó 10 másodpercben a visszaszámláló piros.
 - Ütközéshez tartozó helyes válasz: nincs életvesztés, és nem jár csillag.
@@ -168,5 +168,5 @@ Egy későbbi módosítás akkor kész, ha:
 - mind a négy sáv elérhető egérrel és billentyűzettel;
 - a 10 pontos gyorsulás, a nem 30-as mérföldkövek bónuszfeladata és a 30 pontos életbónusz-feladat működik;
 - ütközéskor a sebesség visszaesik, élet pedig csak hibás válasznál vagy időtúllépésnél fogy;
-- a feladat időzítője minden új kérdésnél 60 másodpercről indul;
+- a feladat időzítője minden új kérdésnél 30 másodpercről indul;
 - az összes automatikus teszt sikeresen lefut.
