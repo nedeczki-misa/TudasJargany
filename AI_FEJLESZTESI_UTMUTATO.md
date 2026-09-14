@@ -68,7 +68,7 @@ Az extrák nélkül is el lehet indulni. Vezetés közben csak a ténylegesen fe
 - Az út négysávos.
 - Irányítás: képernyőgombok, bal/jobb nyílbillentyű, `A`/`D`, illetve közvetlen kattintás egy sávra.
 - Gyűjthető elem: csillag.
-- Akadályok: bója, másik személyautó, busz és sávlezárás.
+- Akadályok: bója, másik személyautó, busz, cikázó vadmotoros és sávlezárás.
 - A játékos három élettel indul.
 - Minden 10. csillagnál egy sebességfokozattal gyorsul az autó, amit rövid, emelkedő hangsor jelez.
 - Minden 10. csillag után bónuszfeladat jelenik meg.

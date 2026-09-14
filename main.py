@@ -947,15 +947,33 @@ class TudasJarganyGame(tk.Tk):
     @staticmethod
     def _random_road_kind() -> str:
         roll = random.random()
-        if roll < 0.52:
+        if roll < 0.50:
             return "star"
-        if roll < 0.68:
+        if roll < 0.65:
             return "cone"
-        if roll < 0.82:
+        if roll < 0.76:
+            return "motorcycle"
+        if roll < 0.86:
             return "car"
-        if roll < 0.92:
+        if roll < 0.94:
             return "bus"
         return "closure"
+
+    @staticmethod
+    def _move_wild_motorcycle(item: dict[str, float | int | str]) -> None:
+        """A motoros sávok közt cikázik, de nem hagyhatja el az utat."""
+        lane_position = float(item.get("lane_position", item["lane"]))
+        direction = float(item.get("lane_direction", 1.0))
+        if random.random() < 0.075:
+            direction *= -1
+        lane_position += direction * 0.095
+        if lane_position <= 0:
+            lane_position, direction = 0.0, 1.0
+        elif lane_position >= 3:
+            lane_position, direction = 3.0, -1.0
+        item["lane_position"] = lane_position
+        item["lane_direction"] = direction
+        item["lane"] = int(round(lane_position))
 
     def _drive_tick(self) -> None:
         if self.mode != "drive" or self.math_active:
@@ -964,20 +982,25 @@ class TudasJarganyGame(tk.Tk):
         if self.frame % 48 == 0:
             occupied = {int(item["lane"]) for item in self.road_items if float(item["y"]) < 120}
             free_lanes = [lane for lane in range(4) if lane not in occupied] or [0, 1, 2, 3]
-            self.road_items.append({
-                "kind": self._random_road_kind(),
-                "lane": random.choice(free_lanes), "y": -45.0,
-            })
+            kind = self._random_road_kind()
+            lane = random.choice(free_lanes)
+            item: dict[str, float | int | str] = {"kind": kind, "lane": lane, "y": -45.0}
+            if kind == "motorcycle":
+                item["lane_position"] = float(lane)
+                item["lane_direction"] = random.choice((-1.0, 1.0))
+            self.road_items.append(item)
 
         car_y = self.canvas.winfo_height() - 128
         survivors = []
         hit_obstacle: str | None = None
         for item in self.road_items:
             item["y"] = float(item["y"]) + self.road_speed
+            if item["kind"] == "motorcycle":
+                self._move_wild_motorcycle(item)
             collision_distance = 72 if item["kind"] == "closure" else 54
             if (
                 hit_obstacle is None
-                and int(item["lane"]) == self.lane
+                and abs(float(item.get("lane_position", item["lane"])) - self.lane) < 0.43
                 and abs(float(item["y"]) - car_y) < collision_distance
             ):
                 if item["kind"] == "star":
@@ -1004,6 +1027,7 @@ class TudasJarganyGame(tk.Tk):
             obstacle_names = {
                 "cone": "A bója megállított.",
                 "car": "Összekoccantál egy másik autóval.",
+                "motorcycle": "Egy vadmotoros eléd cikázott!",
                 "bus": "Túl közel kerültél a buszhoz.",
                 "closure": "Behajtottál a lezárt sávba!",
             }
@@ -1349,7 +1373,7 @@ class TudasJarganyGame(tk.Tk):
                 y += 72
 
         for item in self.road_items:
-            x, y = self._lane_x(int(item["lane"])), float(item["y"])
+            x, y = self._lane_x(float(item.get("lane_position", item["lane"]))), float(item["y"])
             kind = item["kind"]
             if kind == "star":
                 self._draw_star(x, y, 27)
@@ -1357,6 +1381,8 @@ class TudasJarganyGame(tk.Tk):
                 self._draw_cone(x, y)
             elif kind == "car":
                 self._draw_other_car(x, y)
+            elif kind == "motorcycle":
+                self._draw_wild_motorcycle(x, y, float(item.get("lane_direction", 1.0)))
             elif kind == "bus":
                 self._draw_bus(x, y)
             else:
@@ -1434,6 +1460,22 @@ class TudasJarganyGame(tk.Tk):
         self.canvas.create_rectangle(x - 19, y + 2, x + 19, y + 12, fill="white", outline="")
         self.canvas.create_rectangle(x - 34, y + 27, x + 34, y + 37, fill="#FF6D00", outline="#8D3B00", width=2)
 
+    def _draw_wild_motorcycle(self, x: float, y: float, direction: float) -> None:
+        """Szines, enyhen megdolgoztatott motor es sisakos motoros felulnezetben."""
+        lean = 11 if direction > 0 else -11
+        self.canvas.create_line(x - lean, y - 39, x + lean, y + 44, fill="#20262A", width=10)
+        self.canvas.create_oval(x - lean - 12, y - 49, x - lean + 12, y - 25, fill="#1B2026", outline="#101418", width=2)
+        self.canvas.create_oval(x + lean - 12, y + 29, x + lean + 12, y + 53, fill="#1B2026", outline="#101418", width=2)
+        self.canvas.create_polygon(
+            x - 14 + lean, y - 20, x + 15 + lean, y - 10,
+            x + 12 + lean, y + 27, x - 12 + lean, y + 30,
+            fill="#E53935", outline="#6D1515", width=2,
+        )
+        self.canvas.create_oval(x - 16 - lean / 3, y - 18, x + 16 - lean / 3, y + 12, fill="#263238", outline="#111820", width=2)
+        self.canvas.create_oval(x - 10 - lean / 3, y - 29, x + 10 - lean / 3, y - 9, fill="#FFCE45", outline="#7E5A00", width=2)
+        self.canvas.create_line(x - 26 + lean, y + 17, x + 25 + lean, y + 17, fill="#BDEBFF", width=4)
+        self.canvas.create_line(x - 38, y + 46, x - 57, y + 64, fill="#F7D24C", width=3)
+        self.canvas.create_line(x + 38, y + 46, x + 57, y + 64, fill="#F7D24C", width=3)
     def _draw_other_car(self, x: float, y: float) -> None:
         self.canvas.create_oval(x - 45, y - 42, x - 31, y + 43, fill="#1D2529", outline="")
         self.canvas.create_oval(x + 31, y - 42, x + 45, y + 43, fill="#1D2529", outline="")

@@ -24,7 +24,7 @@ Angolfeladatnál húzd az egeret az angol szó fölé: a játék offline kimondj
 - A pálya gyorsulását az `assets/sounds/speed_up.wav` hang jelzi.
 - Minden 30. pontnál külön, 60 másodperces tanulási feladat jelenik meg. Helyes válasszal egy élet tölthető vissza, legfeljebb háromig; ezen a mérföldkőn a szokásos +2 csillagos bónusz nem jár.
 - Ütközéskor fékhang, majd bójánál könnyű, más járműnél vagy sávlezárásnál erősebb ütközési hang hallható.
-- A bóják mellett más autók és buszok is közlekednek az úton.
+- A bóják, más autók és buszok mellett vadmotorosok is megjelennek; a motorosok cikázva sávot váltanak.
 - Induláskor motorhang szól; vezetés közben a **DUDÁLJ** gomb a kürtöt használja. Felszerelt rendőrségi szirénánál szirénahang is szól.
 - A lezárt sávba hajtás után három egymást követő, a műhelyben kiválasztott tantárgyakból érkező feladatot kell megoldani.
 - Az út négysávos; az egérrel mind a négy sáv közvetlenül kiválasztható.
