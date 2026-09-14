@@ -85,6 +85,7 @@ class TudasJarganyGame(tk.Tk):
         self.speed_level = 0
         self.road_speed = BASE_ROAD_SPEED
         self.pending_bonus_challenges = 0
+        self.pending_life_challenges = 0
         self.message = ""
         self.message_frames = 0
         self.math_tasks = MathTaskGenerator()
@@ -96,11 +97,12 @@ class TudasJarganyGame(tk.Tk):
         self.challenge_title = "MATEK-SZERVIZ"
         self.challenge_reason = "Az akadály megállított. Rakd ki a hiányzó részt!"
         self.challenge_is_collision = False
+        self.challenge_life_reward = False
+        self.challenge_life_granted = False
         self.task_timer_job: str | None = None
         self.task_seconds_left = 60
         self.task_resolved = False
         self.speed_just_increased = False
-        self.life_just_restored = False
 
         self._build_window()
         self.after(80, self._reset_build)
@@ -713,8 +715,8 @@ class TudasJarganyGame(tk.Tk):
         self.lane, self.frame, self.score, self.lives = 1, 0, 0, 3
         self.speed_level, self.road_speed = 0, BASE_ROAD_SPEED
         self.speed_just_increased = False
-        self.life_just_restored = False
         self.pending_bonus_challenges = 0
+        self.pending_life_challenges = 0
         self.road_items = []
         self.message, self.message_frames = "RAJT!", 45
         self.math_active = False
@@ -753,15 +755,14 @@ class TudasJarganyGame(tk.Tk):
         sped_up = False
         first_milestone = (old_score // 10 + 1) * 10
         for milestone in range(first_milestone, self.score + 1, 10):
-            self.pending_bonus_challenges += 1
+            if milestone % 30 == 0:
+                self.pending_life_challenges += 1
+                self.message = f"{milestone} PONT! ÉLETBÓNUSZ-FELADAT!"
+            else:
+                self.pending_bonus_challenges += 1
+                self.message = f"{milestone} PONT! SEBESSÉGVÁLTÁS!"
             self.speed_level += 1
             self.road_speed = BASE_ROAD_SPEED + self.speed_level * SPEED_STEP
-            if milestone % 30 == 0 and self.lives < 3:
-                self.lives += 1
-                self.life_just_restored = True
-                self.message = f"{milestone} PONT! +1 ÉLET ÉS ÚJ SEBESSÉG!"
-            else:
-                self.message = f"{milestone} PONT! SEBESSÉGVÁLTÁS!"
             self.message_frames = 45
             sped_up = True
             self.speed_just_increased = True
@@ -822,7 +823,6 @@ class TudasJarganyGame(tk.Tk):
                     else:
                         # A gyorsulási üzenetet itt rögtön megjelenítjük.
                         self.speed_just_increased = False
-                        self.life_just_restored = False
                     self.bell()
                 else:
                     hit_obstacle = str(item["kind"])
@@ -852,6 +852,8 @@ class TudasJarganyGame(tk.Tk):
                 is_collision=True,
                 delay=250,
             )
+        elif self.pending_life_challenges:
+            self._start_pending_life(delay=180)
         elif self.pending_bonus_challenges:
             self._start_pending_bonus(delay=180)
         elif self.lives <= 0:
@@ -866,6 +868,7 @@ class TudasJarganyGame(tk.Tk):
         title: str,
         reason: str,
         is_collision: bool,
+        life_reward: bool = False,
         delay: int = 0,
     ) -> None:
         self.math_active = True
@@ -875,8 +878,23 @@ class TudasJarganyGame(tk.Tk):
         self.challenge_title = title
         self.challenge_reason = reason
         self.challenge_is_collision = is_collision
+        self.challenge_life_reward = life_reward
+        self.challenge_life_granted = False
         self.after(delay, self._show_math_task)
 
+    def _start_pending_life(self, delay: int = 0) -> None:
+        if self.pending_life_challenges <= 0:
+            return
+        self.pending_life_challenges -= 1
+        self._begin_math_challenge(
+            count=1,
+            reward=0,
+            title="30 PONTOS ÉLETBÓNUSZ!",
+            reason="Oldd meg a feladatot, hogy visszakapj egy életet!",
+            is_collision=False,
+            life_reward=True,
+            delay=delay,
+        )
     def _start_pending_bonus(self, delay: int = 0) -> None:
         if self.pending_bonus_challenges <= 0:
             return
@@ -984,7 +1002,15 @@ class TudasJarganyGame(tk.Tk):
             for button in buttons:
                 button.configure(state="disabled")
             clicked.configure(bg=BRICK_GREEN, disabledforeground="white")
-            if self.challenge_reward:
+            if self.challenge_life_reward:
+                if self.lives < 3:
+                    self.lives += 1
+                    self.challenge_life_granted = True
+                    reward_note = "  Visszakaptál egy életet!"
+                else:
+                    reward_note = "  Már mindhárom életed megvan!"
+                self._update_drive_status()
+            elif self.challenge_reward:
                 self._add_stars(self.challenge_reward)
                 reward_note = f"  +{self.challenge_reward} csillag!"
             else:
@@ -1059,6 +1085,8 @@ class TudasJarganyGame(tk.Tk):
         if self.challenge_is_collision:
             self._lose_life()
             feedback.configure(text="Lejárt az idő: −1 élet.", fg="#D14B3E")
+        elif self.challenge_life_reward:
+            feedback.configure(text="Lejárt az idő, az élet most nem töltődött vissza.", fg="#D14B3E")
         else:
             feedback.configure(text="Lejárt az idő, most nem jár bónuszcsillag.", fg="#D14B3E")
         self.after(1300, lambda: self._finish_math_task(popup, success=False))
@@ -1077,9 +1105,13 @@ class TudasJarganyGame(tk.Tk):
             return
 
         self.math_active = False
-        if self.life_just_restored:
-            reward_text = "30 PONT! VISSZAKAPTÁL EGY ÉLETET!"
-            self.life_just_restored = False
+        if self.challenge_life_reward:
+            if self.challenge_life_granted:
+                reward_text = "ÉLET VISSZATÖLTVE!"
+            elif success:
+                reward_text = "MÁR MINDHÁROM ÉLETED MEGVAN!"
+            else:
+                reward_text = "AZ ÉLET MOST NEM TÖLTŐDÖTT VISSZA"
             self.speed_just_increased = False
         elif self.speed_just_increased:
             reward_text = "10 PONT! GYORSABB FOKOZAT!"
@@ -1091,6 +1123,8 @@ class TudasJarganyGame(tk.Tk):
         self.message, self.message_frames = reward_text, 40
         if self.lives <= 0:
             self.after(350, self._game_over)
+        elif self.pending_life_challenges:
+            self._start_pending_life(delay=250)
         elif self.pending_bonus_challenges:
             self._start_pending_bonus(delay=250)
         else:

@@ -67,7 +67,7 @@ Az extrák nélkül is el lehet indulni. Vezetés közben csak a ténylegesen fe
 - A játékos három élettel indul.
 - Minden 10. csillagnál egy sebességfokozattal gyorsul az autó.
 - Minden 10. csillag után bónuszfeladat jelenik meg.
-- Minden 30. pontnál egy élet visszatöltődik, de az életek száma nem nőhet három fölé.
+- Minden 30. pontnál külön életbónusz-feladat jelenik meg. Helyes válasz egy életet tölt vissza, legfeljebb háromig; a 30 többszörösein a szokásos +2 csillagos bónusz kimarad.
 - Bármilyen ütközés egy sebességfokozattal lassít, de önmagában még nem vesz el életet.
 - Sávlezárásba hajtáskor három egymást követő oktatási feladatot kell megoldani.
 
@@ -160,7 +160,7 @@ Egy későbbi módosítás akkor kész, ha:
 - az autó kötelező elemekkel, extrák nélkül is elindítható;
 - minden kiválasztott szín, forma és extra helyesen jelenik meg az úton;
 - mind a négy sáv elérhető egérrel és billentyűzettel;
-- a 10 csillagos gyorsulás és bónuszfeladat, valamint a 30 pontos élet-visszatöltés működik;
+- a 10 pontos gyorsulás, a nem 30-as mérföldkövek bónuszfeladata és a 30 pontos életbónusz-feladat működik;
 - ütközéskor a sebesség visszaesik, élet pedig csak hibás válasznál vagy időtúllépésnél fogy;
 - a feladat időzítője minden új kérdésnél 60 másodpercről indul;
 - az összes automatikus teszt sikeresen lefut.
