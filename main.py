@@ -100,6 +100,7 @@ class TudasJarganyGame(tk.Tk):
         self.task_seconds_left = 60
         self.task_resolved = False
         self.speed_just_increased = False
+        self.life_just_restored = False
 
         self._build_window()
         self.after(80, self._reset_build)
@@ -712,6 +713,7 @@ class TudasJarganyGame(tk.Tk):
         self.lane, self.frame, self.score, self.lives = 1, 0, 0, 3
         self.speed_level, self.road_speed = 0, BASE_ROAD_SPEED
         self.speed_just_increased = False
+        self.life_just_restored = False
         self.pending_bonus_challenges = 0
         self.road_items = []
         self.message, self.message_frames = "RAJT!", 45
@@ -754,7 +756,12 @@ class TudasJarganyGame(tk.Tk):
             self.pending_bonus_challenges += 1
             self.speed_level += 1
             self.road_speed = BASE_ROAD_SPEED + self.speed_level * SPEED_STEP
-            self.message = f"{milestone} CSILLAG! SEBESSÉGVÁLTÁS!"
+            if milestone % 30 == 0 and self.lives < 3:
+                self.lives += 1
+                self.life_just_restored = True
+                self.message = f"{milestone} PONT! +1 ÉLET ÉS ÚJ SEBESSÉG!"
+            else:
+                self.message = f"{milestone} PONT! SEBESSÉGVÁLTÁS!"
             self.message_frames = 45
             sped_up = True
             self.speed_just_increased = True
@@ -815,6 +822,7 @@ class TudasJarganyGame(tk.Tk):
                     else:
                         # A gyorsulási üzenetet itt rögtön megjelenítjük.
                         self.speed_just_increased = False
+                        self.life_just_restored = False
                     self.bell()
                 else:
                     hit_obstacle = str(item["kind"])
@@ -1069,8 +1077,12 @@ class TudasJarganyGame(tk.Tk):
             return
 
         self.math_active = False
-        if self.speed_just_increased:
-            reward_text = "10 CSILLAG! GYORSABB FOKOZAT!"
+        if self.life_just_restored:
+            reward_text = "30 PONT! VISSZAKAPTÁL EGY ÉLETET!"
+            self.life_just_restored = False
+            self.speed_just_increased = False
+        elif self.speed_just_increased:
+            reward_text = "10 PONT! GYORSABB FOKOZAT!"
             self.speed_just_increased = False
         elif self.challenge_is_collision:
             reward_text = "HELYES! MEHETSZ TOVÁBB!" if success else "INDULÁS TOVÁBB!"

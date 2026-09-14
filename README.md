@@ -18,6 +18,7 @@ A matematikai feladatok összeadást és kivonást gyakoroltatnak a 30-as számk
 
 - Minden 10. csillag után külön bónusz matekfeladat következik, amely 2 csillagot ér.
 - Minden 10. csillagnál egy fokozattal gyorsabb lesz az autó, és ekkor jelenik meg a bónuszfeladat is.
+- Minden 30. pontnál visszakap a játékos egy életet, legfeljebb a kezdő három életig.
 - Ütközéskor a sebesség egy fokozattal visszaáll.
 - A bóják mellett más autók és buszok is közlekednek az úton.
 - A lezárt sávba hajtás után három egymást követő matekfeladatot kell megoldani.
