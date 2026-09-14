@@ -24,7 +24,7 @@ Ez a dokumentum a játék későbbi, AI segítségével történő továbbfejles
 - `main.py`: a teljes felület, az autóépítés, a vezetés, az akadályok, a pontozás és a feladatablakok.
 - `math_tasks.py`: összeadásos és kivonásos feladatok generátora.
 - `learning_tasks.py`: közös `LearningTask` feladatmodell és angol szókincsgenerátor.
-- `task_manager.py`: a matek- és angolfeladatok szigorú váltását kezeli.
+- `task_manager.py`: a műhelyben kiválasztott tantárgyak sorrendjét és váltását kezeli.
 - `speech.py`: Windows `System.Speech` alapú, offline angol kiejtés egér-ráhúzásra.
 - `test_learning_tasks.py`: angol és többtantárgyas feladatok automatikus tesztjei.
 - `test_math_tasks.py`: a feladatgenerátor automatikus tesztjei.
@@ -78,7 +78,7 @@ Az extrák nélkül is el lehet indulni. Vezetés közben csak a ténylegesen fe
 ## Feladat- és jutalmazási szabályok
 
 - Minden egyes feladatra 60 másodperc áll rendelkezésre.
-- A feladatok minden új kérdésnél felváltva érkeznek: matek, angol, matek, angol.
+- A műhely Feladatok menüjében alapból csak a Matek aktív; Angol bekapcsolásakor a kiválasztott tantárgyak felváltva érkeznek.
 - Az utolsó 10 másodpercben a visszaszámláló piros.
 - Ütközéshez tartozó helyes válasz: nincs életvesztés, és nem jár csillag.
 - Ütközéshez tartozó hibás válasz: egy élet levonása, majd újrapróbálható a feladat, ha maradt élet.
@@ -117,7 +117,7 @@ A jelenlegi modulok:
 - `math_tasks.py`: 30-as számkörbeli összeadás és kivonás;
 - `learning_tasks.py`: angol–magyar alap szókincs;
 - `speech.py`: az angol szavak fölé vitt egérhez tartozó offline kiejtés;
-- `task_manager.py`: szigorú `MATEK → ANGOL` váltás.
+- `task_manager.py`: alapból Matek, Angol bekapcsolásakor `MATEK → ANGOL` váltás.
 
 Új tantárgy hozzáadásakor készíts egy `next_task()` metódusú generátort, amely `LearningTask` objektumot ad vissza, majd regisztráld a `TaskManager` tantárgysorrendjében. Így később a magyar nyelvtan, irodalom vagy szövegértés a feladatablak átírása nélkül bővíthető.
 
@@ -138,7 +138,7 @@ A jelenlegi modulok:
 ## Ajánlott következő fejlesztési lépések
 
 1. Egységes kezdőképernyő és arculat kialakítása a **TudasJargany** névhez.
-2. A tantárgy kiválasztása a játék elején: vegyes, matematika, angol, magyar vagy olvasás/irodalom.
+2. A műhely Feladatok menüjének bővítése új tantárgyak jelölőnégyzeteivel.
 3. Angol szókincs bővítése témakörök szerint (állatok, színek, család, iskola).
 4. Magyar és olvasási feladatgenerátor beillesztése a `TaskManager` váltási sorrendjébe.
 5. Tantárgyválasztó beállítás készítése: vegyes, csak matematika, csak angol vagy későbbi tantárgyak.

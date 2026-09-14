@@ -10,9 +10,10 @@ Egyszerű, színes Python/Tkinter játék gyerekeknek.
 4. Húzd az alkatrészeket az azonos alakú, szaggatott helyükre. A kerekek, lámpa és lökhárító mellett külön légterelőt és vonóhorgot is fel lehet szerelni.
 5. Ha minden kötelező elem a helyén van, kattints az **INDULÁS!** gombra.
 6. Az utcán gyűjtsd össze a csillagokat, és kerüld ki az akadályokat.
-7. Ha az autó akadálynak ütközik, megnyílik a **Tudás-szerviz**. A feladatok felváltva matekból és angolból érkeznek, minden kérdésre 60 másodperc áll rendelkezésre. Helyes válasz után élet- és csillagváltozás nélkül folytatódik a vezetés.
+7. A műhely alsó sávjában kattints a **FELADATOK** gombra. A Matek alapból be van jelölve, az Angol kikapcsolva. Jelöld be az Angolt is, ha vegyes feladatokat szeretnél.
+8. Ha az autó akadálynak ütközik, megnyílik a **Tudás-szerviz**. Minden kérdésre 60 másodperc áll rendelkezésre. Helyes válasz után élet- és csillagváltozás nélkül folytatódik a vezetés.
 
-A matekfeladatok összeadást és kivonást gyakoroltatnak a 30-as számkörben. Az angolfeladatok alap angol–magyar szavakat gyakoroltatnak, például `apple` = alma vagy kutya = `dog`. A két tantárgy szigorúan felváltva jelenik meg.
+A Matek alapértelmezett feladatként összeadást és kivonást gyakoroltat a 30-as számkörben. Ha az Angol is be van jelölve, alap angol–magyar szavak is érkeznek, például `apple` = alma vagy kutya = `dog`; ekkor a két tantárgy felváltva jelenik meg.
 
 Angolfeladatnál húzd az egeret az angol szó fölé: a játék offline kimondja a Windows telepített angol beszédhangjával. A kiejtéshez Windows és legalább egy angol rendszerhang szükséges.
 
@@ -24,7 +25,7 @@ Angolfeladatnál húzd az egeret az angol szó fölé: a játék offline kimondj
 - Minden 30. pontnál külön, 60 másodperces tanulási feladat jelenik meg. Helyes válasszal egy élet tölthető vissza, legfeljebb háromig; ezen a mérföldkőn a szokásos +2 csillagos bónusz nem jár.
 - Ütközéskor a sebesség egy fokozattal visszaáll, és külön ütközési hang hallható.
 - A bóják mellett más autók és buszok is közlekednek az úton.
-- A lezárt sávba hajtás után három egymást követő, felváltva matek- és angolfeladatot kell megoldani.
+- A lezárt sávba hajtás után három egymást követő, a műhelyben kiválasztott tantárgyakból érkező feladatot kell megoldani.
 - Az út négysávos; az egérrel mind a négy sáv közvetlenül kiválasztható.
 - Ütközési feladatnál a hibás válasz vagy az idő lejárta egy életet elvesz, a helyes válasz viszont nem kerül életbe és nem ad csillagot.
 - A 10 csillagos bónuszfeladat helyes válasza továbbra is 2 csillagot ér; időtúllépéskor a bónusz elvész.

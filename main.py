@@ -97,6 +97,11 @@ class TudasJarganyGame(tk.Tk):
         self.message = ""
         self.message_frames = 0
         self.task_manager = TaskManager()
+        self.subject_vars = {
+            "MATEK": tk.BooleanVar(value=True),
+            "ANGOL": tk.BooleanVar(value=False),
+        }
+        self.settings_popup: tk.Toplevel | None = None
         self.english_speaker = EnglishSpeaker()
         self.math_active = False
         self.math_popup: tk.Toplevel | None = None
@@ -183,6 +188,10 @@ class TudasJarganyGame(tk.Tk):
         )
         self.auto_button.configure(fg="white", activebackground="#9675D1", activeforeground="white")
         self.auto_button.pack(side="left", padx=(9, 0))
+        self.settings_button = self._button(
+            "⚙  FELADATOK", self._show_task_settings, "#E1F0F8", size=10
+        )
+        self.settings_button.pack(side="left", padx=(9, 0))
 
         self.status = tk.Label(
             self.controls, text="Húzd a építőkockákat a szaggatott helyükre!",
@@ -245,6 +254,9 @@ class TudasJarganyGame(tk.Tk):
         if self.math_popup and self.math_popup.winfo_exists():
             self.math_popup.destroy()
         self.math_popup = None
+        if self.settings_popup and self.settings_popup.winfo_exists():
+            self.settings_popup.destroy()
+        self.settings_popup = None
         self.math_active = False
         self.task_resolved = False
         self.dragged = None
@@ -261,16 +273,80 @@ class TudasJarganyGame(tk.Tk):
         self._draw()
 
     def _show_build_controls(self) -> None:
-        for widget in (self.left_button, self.right_button, self.back_button, self.auto_button, self.start_button, self.status):
+        for widget in (self.left_button, self.right_button, self.back_button, self.auto_button, self.settings_button, self.start_button, self.status):
             widget.pack_forget()
         self.back_button.configure(text="↻  ELÖLRŐL", command=self._reset_build)
         self.back_button.pack(side="left")
         self.auto_button.pack(side="left", padx=(9, 0))
+        self.settings_button.pack(side="left", padx=(9, 0))
         self.status.pack(side="left", expand=True, padx=14)
         self.start_button.pack(side="right")
 
+    def _show_task_settings(self) -> None:
+        """A muhelyben valaszthato ki, mely tantargyakbol jojjenek feladatok."""
+        if self.mode != "build":
+            return
+        if self.settings_popup and self.settings_popup.winfo_exists():
+            self.settings_popup.lift()
+            return
+
+        popup = tk.Toplevel(self)
+        self.settings_popup = popup
+        popup.title("Feladatok be\u00e1ll\u00edt\u00e1sa")
+        popup.geometry("440x330")
+        popup.resizable(False, False)
+        popup.configure(bg="#FFF7D1")
+        popup.transient(self)
+        popup.grab_set()
+
+        tk.Label(
+            popup, text="MELYIK FELADATOK J\u00d6JJENEK?",
+            font=("Arial", 18, "bold"), bg="#FFF7D1", fg="#1565C0",
+        ).pack(pady=(28, 8))
+        tk.Label(
+            popup, text="Jel\u00f6ld be a gyakorolni k\u00edv\u00e1nt tant\u00e1rgyakat!",
+            font=("Arial", 12), bg="#FFF7D1", fg=INK,
+        ).pack(pady=(0, 14))
+        choices = tk.Frame(popup, bg="#FFF7D1")
+        choices.pack()
+        for subject, detail in (
+            ("MATEK", "\u00d6sszead\u00e1s \u00e9s kivon\u00e1s 30-as sz\u00e1mk\u00f6rben"),
+            ("ANGOL", "Alap angol-magyar szavak kiejt\u00e9ssel"),
+        ):
+            tk.Checkbutton(
+                choices, text=f"{subject} - {detail}", variable=self.subject_vars[subject],
+                font=("Arial", 12, "bold"), bg="#FFF7D1", activebackground="#FFF7D1",
+                fg=INK, selectcolor="white", anchor="w", cursor="hand2",
+            ).pack(fill="x", pady=5)
+        feedback = tk.Label(popup, text="", font=("Arial", 11, "bold"), bg="#FFF7D1")
+        feedback.pack(pady=(11, 3))
+        tk.Button(
+            popup, text="MENT\u00c9S", command=lambda: self._save_task_settings(popup, feedback),
+            font=("Arial", 12, "bold"), bg=BRICK_GREEN, fg="white",
+            activebackground="#55C16B", activeforeground="white", relief="flat",
+            padx=27, pady=8, cursor="hand2",
+        ).pack(pady=(4, 14))
+        popup.protocol("WM_DELETE_WINDOW", lambda: self._close_task_settings(popup))
+
+    def _close_task_settings(self, popup: tk.Toplevel) -> None:
+        popup.grab_release()
+        popup.destroy()
+        self.settings_popup = None
+
+    def _save_task_settings(self, popup: tk.Toplevel, feedback: tk.Label) -> None:
+        selected = tuple(
+            subject for subject in TaskManager.AVAILABLE_SUBJECTS if self.subject_vars[subject].get()
+        )
+        if not selected:
+            feedback.configure(text="V\u00e1lassz legal\u00e1bb egy tant\u00e1rgyat!", fg="#D14B3E")
+            return
+        self.task_manager = TaskManager(enabled_subjects=selected)
+        selected_names = ", ".join(subject.title() for subject in selected)
+        self.status.configure(text=f"Feladatok: {selected_names}", fg="#238636")
+        self._close_task_settings(popup)
+
     def _show_drive_controls(self) -> None:
-        for widget in (self.left_button, self.right_button, self.back_button, self.auto_button, self.start_button, self.status):
+        for widget in (self.left_button, self.right_button, self.back_button, self.auto_button, self.settings_button, self.start_button, self.status):
             widget.pack_forget()
         self.back_button.configure(text="🔧  MŰHELY", command=self._reset_build)
         self.back_button.pack(side="left", padx=(0, 10))

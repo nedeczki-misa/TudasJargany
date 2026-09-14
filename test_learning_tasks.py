@@ -29,10 +29,17 @@ class EnglishTaskTests(unittest.TestCase):
 
 
 class TaskManagerTests(unittest.TestCase):
+    def test_default_subject_is_math_only(self) -> None:
+        manager = TaskManager(
+            MathTaskGenerator(random.Random(2)),
+            EnglishTaskGenerator(random.Random(3)),
+        )
+        self.assertEqual([manager.next_task().subject for _ in range(4)], ["MATEK"] * 4)
     def test_tasks_strictly_alternate_between_math_and_english(self) -> None:
         manager = TaskManager(
             MathTaskGenerator(random.Random(3)),
             EnglishTaskGenerator(random.Random(4)),
+            ("MATEK", "ANGOL"),
         )
         subjects = [manager.next_task().subject for _ in range(8)]
         self.assertEqual(subjects, ["MATEK", "ANGOL"] * 4)
