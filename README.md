@@ -18,8 +18,9 @@ A matematikai feladatok összeadást és kivonást gyakoroltatnak a 30-as számk
 
 - Minden 10. csillag után külön bónusz matekfeladat következik, amely 2 csillagot ér.
 - Minden 10. csillagnál egy fokozattal gyorsabb lesz az autó, és ekkor jelenik meg a bónuszfeladat is.
+- A pálya gyorsulását rövid, emelkedő hangsor jelzi.
 - Minden 30. pontnál külön, 60 másodperces matekfeladat jelenik meg. Helyes válasszal egy élet tölthető vissza, legfeljebb háromig; ezen a mérföldkőn a szokásos +2 csillagos bónusz nem jár.
-- Ütközéskor a sebesség egy fokozattal visszaáll.
+- Ütközéskor a sebesség egy fokozattal visszaáll, és külön ütközési hang hallható.
 - A bóják mellett más autók és buszok is közlekednek az úton.
 - A lezárt sávba hajtás után három egymást követő matekfeladatot kell megoldani.
 - Az út négysávos; az egérrel mind a négy sáv közvetlenül kiválasztható.

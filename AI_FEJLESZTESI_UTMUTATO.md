@@ -65,10 +65,10 @@ Az extrák nélkül is el lehet indulni. Vezetés közben csak a ténylegesen fe
 - Gyűjthető elem: csillag.
 - Akadályok: bója, másik személyautó, busz és sávlezárás.
 - A játékos három élettel indul.
-- Minden 10. csillagnál egy sebességfokozattal gyorsul az autó.
+- Minden 10. csillagnál egy sebességfokozattal gyorsul az autó, amit rövid, emelkedő hangsor jelez.
 - Minden 10. csillag után bónuszfeladat jelenik meg.
 - Minden 30. pontnál külön életbónusz-feladat jelenik meg. Helyes válasz egy életet tölt vissza, legfeljebb háromig; a 30 többszörösein a szokásos +2 csillagos bónusz kimarad.
-- Bármilyen ütközés egy sebességfokozattal lassít, de önmagában még nem vesz el életet.
+- Bármilyen ütközés külön ütközési hangot ad és egy sebességfokozattal lassít, de önmagában még nem vesz el életet.
 - Sávlezárásba hajtáskor három egymást követő oktatási feladatot kell megoldani.
 
 ## Feladat- és jutalmazási szabályok

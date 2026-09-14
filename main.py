@@ -4,8 +4,14 @@ from __future__ import annotations
 
 import math
 import random
+import threading
 import tkinter as tk
 from dataclasses import dataclass
+
+try:
+    import winsound
+except ImportError:  # Nem Windows rendszeren a Tk csengője lesz a tartalék.
+    winsound = None
 
 from math_tasks import MathTask, MathTaskGenerator
 
@@ -766,10 +772,13 @@ class TudasJarganyGame(tk.Tk):
             self.message_frames = 45
             sped_up = True
             self.speed_just_increased = True
+        if sped_up:
+            self._play_speed_up_sound()
         self._update_drive_status()
         return sped_up
 
     def _slow_down_after_collision(self) -> None:
+        self._play_collision_sound()
         self.speed_just_increased = False
         if self.speed_level > 0:
             self.speed_level -= 1
@@ -779,6 +788,28 @@ class TudasJarganyGame(tk.Tk):
             self.message = "ÜTKÖZÉS – MARAD AZ ALAPSEBESSÉG!"
         self.message_frames = 45
         self._update_drive_status()
+
+    def _play_tones(self, tones: tuple[tuple[int, int], ...]) -> None:
+        """Rövid hangsort játszik le úgy, hogy közben a GUI nem akad meg."""
+        if winsound is None:
+            self.bell()
+            return
+
+        def play() -> None:
+            try:
+                for frequency, duration in tones:
+                    winsound.Beep(frequency, duration)
+            except RuntimeError:
+                # Egyes Windows hangillesztők nem támogatják a Beep hívásokat.
+                winsound.MessageBeep()
+
+        threading.Thread(target=play, daemon=True).start()
+
+    def _play_collision_sound(self) -> None:
+        self._play_tones(((330, 100), (220, 180)))
+
+    def _play_speed_up_sound(self) -> None:
+        self._play_tones(((523, 70), (659, 70), (784, 120)))
 
     @staticmethod
     def _random_road_kind() -> str:
