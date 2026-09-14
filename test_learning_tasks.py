@@ -15,6 +15,11 @@ class EnglishTaskTests(unittest.TestCase):
             self.assertIn(task.answer, task.choices)
             self.assertEqual(len(task.choices), 3)
             self.assertEqual(len(set(task.choices)), 3)
+            self.assertIsNotNone(task.pronunciation)
+            if task.choices_in_english:
+                self.assertIn(task.pronunciation, task.choices)
+            else:
+                self.assertIn(task.pronunciation, task.prompt)
 
     def test_no_immediate_repetition(self) -> None:
         generator = EnglishTaskGenerator(random.Random(7))

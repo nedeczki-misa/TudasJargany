@@ -25,6 +25,7 @@ Ez a dokumentum a játék későbbi, AI segítségével történő továbbfejles
 - `math_tasks.py`: összeadásos és kivonásos feladatok generátora.
 - `learning_tasks.py`: közös `LearningTask` feladatmodell és angol szókincsgenerátor.
 - `task_manager.py`: a matek- és angolfeladatok szigorú váltását kezeli.
+- `speech.py`: Windows `System.Speech` alapú, offline angol kiejtés egér-ráhúzásra.
 - `test_learning_tasks.py`: angol és többtantárgyas feladatok automatikus tesztjei.
 - `test_math_tasks.py`: a feladatgenerátor automatikus tesztjei.
 - `README.md`: játékosi használati útmutató.
@@ -115,6 +116,7 @@ A jelenlegi modulok:
 
 - `math_tasks.py`: 30-as számkörbeli összeadás és kivonás;
 - `learning_tasks.py`: angol–magyar alap szókincs;
+- `speech.py`: az angol szavak fölé vitt egérhez tartozó offline kiejtés;
 - `task_manager.py`: szigorú `MATEK → ANGOL` váltás.
 
 Új tantárgy hozzáadásakor készíts egy `next_task()` metódusú generátort, amely `LearningTask` objektumot ad vissza, majd regisztráld a `TaskManager` tantárgysorrendjében. Így később a magyar nyelvtan, irodalom vagy szövegértés a feladatablak átírása nélkül bővíthető.

@@ -15,6 +15,7 @@ except ImportError:  # Nem Windows rendszeren a Tk csengője lesz a tartalék.
 
 from learning_tasks import LearningTask
 from task_manager import TaskManager
+from speech import EnglishSpeaker
 
 
 BG = "#EAF7FF"
@@ -96,6 +97,7 @@ class TudasJarganyGame(tk.Tk):
         self.message = ""
         self.message_frames = 0
         self.task_manager = TaskManager()
+        self.english_speaker = EnglishSpeaker()
         self.math_active = False
         self.math_popup: tk.Toplevel | None = None
         self.current_task: LearningTask | None = None
@@ -956,7 +958,7 @@ class TudasJarganyGame(tk.Tk):
         popup = tk.Toplevel(self)
         self.math_popup = popup
         popup.title(task_title.title())
-        popup.geometry("510x430")
+        popup.geometry("510x470")
         popup.resizable(False, False)
         popup.configure(bg="#FFF7D1")
         popup.transient(self)
@@ -984,11 +986,23 @@ class TudasJarganyGame(tk.Tk):
             font=("Arial", 14, "bold"), bg="#FFF7D1", fg="#26734D"
         )
         timer_label.pack(pady=(0, 8))
-        tk.Label(
+        prompt_label = tk.Label(
             popup, text=task.prompt,
             font=("Arial", 32, "bold"), bg="white", fg=INK,
-            padx=30, pady=15, relief="solid", borderwidth=2
-        ).pack()
+            padx=30, pady=15, relief="solid", borderwidth=2,
+            cursor="hand2" if task.subject == "ANGOL" and not task.choices_in_english else "",
+        )
+        prompt_label.pack()
+        if task.subject == "ANGOL":
+            tk.Label(
+                popup, text="Húzd az egeret az angol szó fölé a kiejtéshez!",
+                font=("Arial", 11, "bold"), bg="#FFF7D1", fg="#526D7A",
+            ).pack(pady=(5, 0))
+            if task.pronunciation and not task.choices_in_english:
+                prompt_label.bind(
+                    "<Enter>",
+                    lambda _event, word=task.pronunciation: self._speak_english_word(word),
+                )
 
         answers = tk.Frame(popup, bg="#FFF7D1")
         answers.pack(pady=20)
@@ -1012,6 +1026,11 @@ class TudasJarganyGame(tk.Tk):
             )
             button.pack(side="left", padx=8)
             buttons.append(button)
+            if task.subject == "ANGOL" and task.choices_in_english:
+                button.bind(
+                    "<Enter>",
+                    lambda _event, word=choice: self._speak_english_word(word),
+                )
         popup.protocol(
             "WM_DELETE_WINDOW",
             lambda: feedback.configure(text="Előbb válassz egy választ!", fg="#D14B3E")
@@ -1020,6 +1039,10 @@ class TudasJarganyGame(tk.Tk):
             1000,
             lambda: self._tick_task_timer(popup, timer_label, buttons, feedback),
         )
+
+    def _speak_english_word(self, word: str | None) -> None:
+        if word:
+            self.english_speaker.speak(word)
 
     def _check_learning_answer(
         self,

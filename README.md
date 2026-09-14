@@ -14,6 +14,8 @@ Egyszerű, színes Python/Tkinter játék gyerekeknek.
 
 A matekfeladatok összeadást és kivonást gyakoroltatnak a 30-as számkörben. Az angolfeladatok alap angol–magyar szavakat gyakoroltatnak, például `apple` = alma vagy kutya = `dog`. A két tantárgy szigorúan felváltva jelenik meg.
 
+Angolfeladatnál húzd az egeret az angol szó fölé: a játék offline kimondja a Windows telepített angol beszédhangjával. A kiejtéshez Windows és legalább egy angol rendszerhang szükséges.
+
 ## Bónuszok és nehezedés
 
 - Minden 10. csillag után külön bónusz tanulási feladat következik, amely 2 csillagot ér.

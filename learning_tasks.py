@@ -16,6 +16,8 @@ class LearningTask:
     choices: tuple[str, ...]
     explanation: str
     subject: str = "MATEK"
+    pronunciation: str | None = None
+    choices_in_english: bool = False
 
 
 class EnglishTaskGenerator:
@@ -40,11 +42,13 @@ class EnglishTaskGenerator:
                 answer = english
                 candidates = [word for _, word in self.VOCABULARY if word != answer]
                 explanation = f"{hungarian.capitalize()} angolul: {english}."
+                choices_in_english = True
             else:
                 prompt = f"Mit jelent magyarul: {english}?"
                 answer = hungarian
                 candidates = [word for word, _ in self.VOCABULARY if word != answer]
                 explanation = f"{english.capitalize()} magyarul: {hungarian}."
+                choices_in_english = False
             if prompt not in self.recent_prompts:
                 self.recent_prompts.append(prompt)
                 choices = [answer, *self.rng.sample(candidates, 2)]
@@ -55,9 +59,11 @@ class EnglishTaskGenerator:
                     choices=tuple(choices),
                     explanation=explanation,
                     subject="ANGOL",
+                    pronunciation=english,
+                    choices_in_english=choices_in_english,
                 )
         # Veges marad a kereses akkor is, ha minden kozelmuli kerdes elfogyott.
         self.recent_prompts.append(prompt)
         choices = [answer, *self.rng.sample(candidates, 2)]
         self.rng.shuffle(choices)
-        return LearningTask(prompt, answer, tuple(choices), explanation, "ANGOL")
+        return LearningTask(prompt, answer, tuple(choices), explanation, "ANGOL", english, choices_in_english)
