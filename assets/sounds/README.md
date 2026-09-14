@@ -14,5 +14,7 @@ Files:
 - speed_up.wav — arcade acceleration cue
 - engine_start.wav — engine start / rumble
 - bonus_success.wav — reward / success sound
+- star_pickup_retro.wav — retro csillagfelvételi hang
+- star_pickup_retro.wav - Star pickup
 
 Recommended integration: keep these under `assets/sounds/`. On Windows, `winsound.PlaySound()` can play WAV files without extra dependencies.

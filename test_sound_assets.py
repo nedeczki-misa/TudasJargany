@@ -7,7 +7,7 @@ class SoundAssetTests(unittest.TestCase):
     def test_every_referenced_sound_file_is_present(self) -> None:
         expected = {
             "engine_start", "speed_up", "brake_screech", "collision_light",
-            "collision_heavy", "bonus_success", "horn", "siren_loop",
+            "collision_heavy", "bonus_success", "horn", "siren_loop", "star_pickup",
         }
         self.assertEqual(set(SOUND_FILES), expected)
         for sound_file in SOUND_FILES.values():

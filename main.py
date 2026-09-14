@@ -37,6 +37,7 @@ SOUND_FILES = {
     "bonus_success": SOUND_DIR / "bonus_success.wav",
     "horn": SOUND_DIR / "horn.wav",
     "siren_loop": SOUND_DIR / "siren_loop.wav",
+    "star_pickup": SOUND_DIR / "star_pickup_retro.wav",
 }
 
 CAR_COLORS = {
@@ -1004,13 +1005,13 @@ class TudasJarganyGame(tk.Tk):
                 and abs(float(item["y"]) - car_y) < collision_distance
             ):
                 if item["kind"] == "star":
+                    self._play_sound_effect("star_pickup")
                     sped_up = self._add_stars(1)
                     if not sped_up:
                         self.message, self.message_frames = "+1 CSILLAG!", 25
                     else:
                         # A gyorsulási üzenetet itt rögtön megjelenítjük.
                         self.speed_just_increased = False
-                    self.bell()
                 else:
                     hit_obstacle = str(item["kind"])
                     self._slow_down_after_collision(hit_obstacle)
