@@ -30,6 +30,7 @@ Ez a dokumentum a játék későbbi, AI segítségével történő továbbfejles
 - `test_math_tasks.py`: a feladatgenerátor automatikus tesztjei.
 - `README.md`: játékosi használati útmutató.
 - `start.bat`: egyszerű Windows-indító.
+- `assets/sounds/`: a játék eredeti WAV hangcsomagja és annak leírása.
 - `wordsearch.py` és `test_wordsearch.py`: a projekt korábbi szókeresős prototípusának megmaradt fájljai; a jelenlegi autós játék nem használja őket.
 
 ## Autóépítés
@@ -73,6 +74,7 @@ Az extrák nélkül is el lehet indulni. Vezetés közben csak a ténylegesen fe
 - Minden 10. csillag után bónuszfeladat jelenik meg.
 - Minden 30. pontnál külön életbónusz-feladat jelenik meg. Helyes válasz egy életet tölt vissza, legfeljebb háromig; a 30 többszörösein a szokásos +2 csillagos bónusz kimarad.
 - Bármilyen ütközés külön ütközési hangot ad és egy sebességfokozattal lassít, de önmagában még nem vesz el életet.
+- A WAV hangok Windows alatt a beépített `winsound.PlaySound()` megoldással, külső csomag nélkül szólnak.
 - Sávlezárásba hajtáskor három egymást követő oktatási feladatot kell megoldani.
 
 ## Feladat- és jutalmazási szabályok

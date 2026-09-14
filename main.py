@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 import random
 import threading
+from pathlib import Path
 import tkinter as tk
 from dataclasses import dataclass
 
@@ -26,6 +27,17 @@ BRICK_YELLOW = "#FFD43B"
 BRICK_GREEN = "#35A853"
 BASE_ROAD_SPEED = 6.5
 SPEED_STEP = 1.6
+SOUND_DIR = Path(__file__).with_name("assets") / "sounds"
+SOUND_FILES = {
+    "engine_start": SOUND_DIR / "engine_start.wav",
+    "speed_up": SOUND_DIR / "speed_up.wav",
+    "brake_screech": SOUND_DIR / "brake_screech.wav",
+    "collision_light": SOUND_DIR / "collision_light.wav",
+    "collision_heavy": SOUND_DIR / "collision_heavy.wav",
+    "bonus_success": SOUND_DIR / "bonus_success.wav",
+    "horn": SOUND_DIR / "horn.wav",
+    "siren_loop": SOUND_DIR / "siren_loop.wav",
+}
 
 CAR_COLORS = {
     "PIROS": BRICK_RED,
@@ -119,6 +131,7 @@ class TudasJarganyGame(tk.Tk):
         self.task_seconds_left = 60
         self.task_resolved = False
         self.speed_just_increased = False
+        self.siren_running = False
 
         self._build_window()
         self.after(80, self._reset_build)
@@ -181,6 +194,7 @@ class TudasJarganyGame(tk.Tk):
 
         self.left_button = self._button("◀  BALRA", lambda: self._change_lane(-1), BRICK_YELLOW)
         self.right_button = self._button("JOBBRA  ▶", lambda: self._change_lane(1), BRICK_YELLOW)
+        self.horn_button = self._button("📣  DUDÁLJ", self._honk, "#E1F0F8", size=10)
         self.back_button = self._button("↻  ELÖLRŐL", self._reset_build, "#E1F0F8", size=11)
         self.back_button.pack(side="left")
         self.auto_button = self._button(
@@ -244,6 +258,7 @@ class TudasJarganyGame(tk.Tk):
         self._draw()
 
     def _reset_build(self) -> None:
+        self._stop_siren()
         if self.animation_job:
             self.after_cancel(self.animation_job)
             self.animation_job = None
@@ -273,7 +288,7 @@ class TudasJarganyGame(tk.Tk):
         self._draw()
 
     def _show_build_controls(self) -> None:
-        for widget in (self.left_button, self.right_button, self.back_button, self.auto_button, self.settings_button, self.start_button, self.status):
+        for widget in (self.left_button, self.right_button, self.horn_button, self.back_button, self.auto_button, self.settings_button, self.start_button, self.status):
             widget.pack_forget()
         self.back_button.configure(text="↻  ELÖLRŐL", command=self._reset_build)
         self.back_button.pack(side="left")
@@ -346,11 +361,12 @@ class TudasJarganyGame(tk.Tk):
         self._close_task_settings(popup)
 
     def _show_drive_controls(self) -> None:
-        for widget in (self.left_button, self.right_button, self.back_button, self.auto_button, self.settings_button, self.start_button, self.status):
+        for widget in (self.left_button, self.right_button, self.horn_button, self.back_button, self.auto_button, self.settings_button, self.start_button, self.status):
             widget.pack_forget()
         self.back_button.configure(text="🔧  MŰHELY", command=self._reset_build)
         self.back_button.pack(side="left", padx=(0, 10))
         self.left_button.pack(side="left")
+        self.horn_button.pack(side="left", padx=(8, 0))
         self.status.pack(side="left", expand=True, padx=10)
         self.right_button.pack(side="right")
 
@@ -798,6 +814,7 @@ class TudasJarganyGame(tk.Tk):
     def _start_driving(self) -> None:
         if not all(part.placed for part in self.parts if part.required):
             return
+        self._stop_siren()
         self.mode = "drive"
         self.lane, self.frame, self.score, self.lives = 1, 0, 0, 3
         self.speed_level, self.road_speed = 0, BASE_ROAD_SPEED
@@ -809,6 +826,8 @@ class TudasJarganyGame(tk.Tk):
         self.math_active = False
         self.header_text.configure(text="Gyűjts csillagokat, kerüld ki az akadályokat!")
         self._show_drive_controls()
+        self._play_sound_effect("engine_start")
+        self.after(950, self._start_siren_loop)
         self._update_drive_status()
         self.focus_set()
         self._drive_tick()
@@ -858,8 +877,8 @@ class TudasJarganyGame(tk.Tk):
         self._update_drive_status()
         return sped_up
 
-    def _slow_down_after_collision(self) -> None:
-        self._play_collision_sound()
+    def _slow_down_after_collision(self, obstacle_kind: str) -> None:
+        self._play_collision_sound(obstacle_kind)
         self.speed_just_increased = False
         if self.speed_level > 0:
             self.speed_level -= 1
@@ -871,7 +890,7 @@ class TudasJarganyGame(tk.Tk):
         self._update_drive_status()
 
     def _play_tones(self, tones: tuple[tuple[int, int], ...]) -> None:
-        """Rövid hangsort játszik le úgy, hogy közben a GUI nem akad meg."""
+        """Tartalek hangjelzes, ha egy hangfajl nem erheto el."""
         if winsound is None:
             self.bell()
             return
@@ -881,17 +900,50 @@ class TudasJarganyGame(tk.Tk):
                 for frequency, duration in tones:
                     winsound.Beep(frequency, duration)
             except RuntimeError:
-                # Egyes Windows hangillesztők nem támogatják a Beep hívásokat.
                 winsound.MessageBeep()
 
         threading.Thread(target=play, daemon=True).start()
 
-    def _play_collision_sound(self) -> None:
-        self._play_tones(((330, 100), (220, 180)))
+    def _play_sound_effect(self, name: str) -> None:
+        sound_file = SOUND_FILES[name]
+        if winsound is not None and sound_file.is_file():
+            restart_siren = self.siren_running
+            self.siren_running = False
+            winsound.PlaySound(str(sound_file), winsound.SND_FILENAME | winsound.SND_ASYNC)
+            if restart_siren:
+                self.after(900, self._start_siren_loop)
+            return
+        fallback = {
+            "speed_up": ((523, 70), (659, 70), (784, 120)),
+            "collision_light": ((330, 100), (220, 180)),
+            "collision_heavy": ((280, 130), (180, 210)),
+            "bonus_success": ((659, 80), (784, 140)),
+        }
+        self._play_tones(fallback.get(name, ((523, 100),)))
+
+    def _play_collision_sound(self, obstacle_kind: str) -> None:
+        self._play_sound_effect("brake_screech")
+        impact = "collision_light" if obstacle_kind == "cone" else "collision_heavy"
+        self.after(170, lambda: self._play_sound_effect(impact))
 
     def _play_speed_up_sound(self) -> None:
-        self._play_tones(((523, 70), (659, 70), (784, 120)))
+        self._play_sound_effect("speed_up")
 
+    def _honk(self) -> None:
+        if self.mode == "drive" and not self.math_active:
+            self._play_sound_effect("horn")
+
+    def _start_siren_loop(self) -> None:
+        has_siren = any(part.kind == "siren" and part.placed for part in self.parts)
+        sound_file = SOUND_FILES["siren_loop"]
+        if self.mode == "drive" and not self.math_active and has_siren and winsound is not None and sound_file.is_file():
+            winsound.PlaySound(str(sound_file), winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_LOOP)
+            self.siren_running = True
+
+    def _stop_siren(self) -> None:
+        if self.siren_running and winsound is not None:
+            winsound.PlaySound(None, 0)
+        self.siren_running = False
     @staticmethod
     def _random_road_kind() -> str:
         roll = random.random()
@@ -938,7 +990,7 @@ class TudasJarganyGame(tk.Tk):
                     self.bell()
                 else:
                     hit_obstacle = str(item["kind"])
-                    self._slow_down_after_collision()
+                    self._slow_down_after_collision(hit_obstacle)
                 continue
             if float(item["y"]) < self.canvas.winfo_height() + 60:
                 survivors.append(item)
@@ -984,6 +1036,7 @@ class TudasJarganyGame(tk.Tk):
         delay: int = 0,
     ) -> None:
         self.math_active = True
+        self._stop_siren()
         self.animation_job = None
         self.challenge_tasks_left = count
         self.challenge_reward = reward
@@ -1153,7 +1206,7 @@ class TudasJarganyGame(tk.Tk):
             feedback.configure(
                 text=f"Ügyes vagy!  {task.explanation}{reward_note}", fg="#238636"
             )
-            self.bell()
+            self._play_sound_effect("bonus_success")
             self.after(1000, lambda: self._finish_learning_task(popup, success=True))
         else:
             clicked.configure(bg="#E55245")
@@ -1263,6 +1316,7 @@ class TudasJarganyGame(tk.Tk):
         elif self.pending_bonus_challenges:
             self._start_pending_bonus(delay=250)
         else:
+            self._start_siren_loop()
             self._drive_tick()
 
     def _draw_road(self) -> None:
@@ -1414,6 +1468,7 @@ class TudasJarganyGame(tk.Tk):
     def _game_over(self) -> None:
         if self.mode != "drive":
             return
+        self._stop_siren()
         self.mode = "stopped"
         popup = tk.Toplevel(self)
         popup.title("Menet vége")

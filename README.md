@@ -21,10 +21,11 @@ Angolfeladatnál húzd az egeret az angol szó fölé: a játék offline kimondj
 
 - Minden 10. csillag után külön bónusz tanulási feladat következik, amely 2 csillagot ér.
 - Minden 10. csillagnál egy fokozattal gyorsabb lesz az autó, és ekkor jelenik meg a bónuszfeladat is.
-- A pálya gyorsulását rövid, emelkedő hangsor jelzi.
+- A pálya gyorsulását az `assets/sounds/speed_up.wav` hang jelzi.
 - Minden 30. pontnál külön, 60 másodperces tanulási feladat jelenik meg. Helyes válasszal egy élet tölthető vissza, legfeljebb háromig; ezen a mérföldkőn a szokásos +2 csillagos bónusz nem jár.
-- Ütközéskor a sebesség egy fokozattal visszaáll, és külön ütközési hang hallható.
+- Ütközéskor fékhang, majd bójánál könnyű, más járműnél vagy sávlezárásnál erősebb ütközési hang hallható.
 - A bóják mellett más autók és buszok is közlekednek az úton.
+- Induláskor motorhang szól; vezetés közben a **DUDÁLJ** gomb a kürtöt használja. Felszerelt rendőrségi szirénánál szirénahang is szól.
 - A lezárt sávba hajtás után három egymást követő, a műhelyben kiválasztott tantárgyakból érkező feladatot kell megoldani.
 - Az út négysávos; az egérrel mind a négy sáv közvetlenül kiválasztható.
 - Ütközési feladatnál a hibás válasz vagy az idő lejárta egy életet elvesz, a helyes válasz viszont nem kerül életbe és nem ad csillagot.
