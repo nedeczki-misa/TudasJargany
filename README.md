@@ -7,7 +7,7 @@ Egyszerű, színes Python/Tkinter játék gyerekeknek.
 1. Fogd meg az alkatrészeket az egér bal gombjával.
 2. Az **AUTÓ SZÍNE** táblán válassz a 16 szín közül. A szín építés közben is megváltoztatható.
 3. A felső **AUTÓFORMA** menüben válassz városi autót, sportautót, terepjárót vagy pickupot.
-4. A felső **JÁTÉK** menüben választhatsz **AUTÓS JÁTÉK**, **HELIKOPTERES JÁTÉK** és **KATA UNIKORNISA** között. A helikopter és az unikornis készen áll; utóbbi feladatok és akadályok nélküli, egyszerű csillaggyűjtő játék.
+4. A felső **JÁTÉK** menüben választhatsz **AUTÓS JÁTÉK**, **HELIKOPTERES JÁTÉK** és **KATA UNIKORNISA** között. A helikopter és az unikornis készen áll; utóbbi olvasás és matek nélküli, egyszerű csillaggyűjtő játék; minden 10. csillagnál egy szöveg nélküli színezés gyakoroltatja az egérkattintást: a középen megjelenő 20 különböző állat egyikét lehet kiszínezni.
 5. Húzd az alkatrészeket az azonos alakú, szaggatott helyükre. A kerekek, lámpa és lökhárító mellett külön légterelőt és vonóhorgot is fel lehet szerelni.
 6. Ha minden kötelező elem a helyén van, kattints az **INDULÁS!** gombra.
 7. Az utcán gyűjtsd össze a csillagokat, és kerüld ki az akadályokat.
