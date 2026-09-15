@@ -1,2 +1,3 @@
 # Helyi, személyes fejlesztői utasítások – nem kerülnek a távoli tárba.
 AGENTS.md
+__pycache__
