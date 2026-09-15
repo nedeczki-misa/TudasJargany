@@ -99,6 +99,7 @@ class TudasJarganyGame(tk.Tk):
         self.drag_offset = (0.0, 0.0)
         self.animation_job: str | None = None
         self.resize_job: str | None = None
+        self.layout_job: str | None = None
         self.canvas_width = 1
         self.canvas_height = 1
         self.last_drive_status: tuple[str, str, int] | None = None
@@ -151,6 +152,7 @@ class TudasJarganyGame(tk.Tk):
         self.siren_running = False
 
         self._build_window()
+        self.bind("<Configure>", self._window_resized, add="+")
         self.after(80, self._reset_build)
 
     @staticmethod
@@ -171,10 +173,11 @@ class TudasJarganyGame(tk.Tk):
     def _build_window(self) -> None:
         header = tk.Frame(self, bg="#1565C0", padx=20, pady=12)
         header.pack(fill="x")
-        tk.Label(
+        self.title_label = tk.Label(
             header, text="TudasJargany", font=("Arial", 23, "bold"),
             bg="#1565C0", fg="white"
-        ).pack(side="left")
+        )
+        self.title_label.pack(side="left")
         self.header_text = tk.Label(
             header, text="Építsd meg, aztán irány az utca!",
             font=("Arial", 13), bg="#1565C0", fg="#D8ECFF"
@@ -256,6 +259,38 @@ class TudasJarganyGame(tk.Tk):
         self.bind("<Right>", lambda _event: self._change_lane(1))
         self.bind("<a>", lambda _event: self._change_lane(-1))
         self.bind("<d>", lambda _event: self._change_lane(1))
+
+    def _window_resized(self, event=None) -> None:
+        """A feliratokat es gombokat az aktualis ablakszelesseghez igazitja."""
+        if event is not None and event.widget is not self:
+            return
+        if self.layout_job is not None:
+            self.after_cancel(self.layout_job)
+        self.layout_job = self.after_idle(self._apply_responsive_layout)
+
+    def _apply_responsive_layout(self) -> None:
+        self.layout_job = None
+        width = max(900, self.winfo_width())
+        compact = width < 1080
+
+        # Kis ablaknal a hosszu alcim helyet ad a valasztoknak. Maga a cim es
+        # minden vezerlo tovabbra is lathato marad.
+        if compact:
+            self.header_text.pack_forget()
+        elif not self.header_text.winfo_manager():
+            self.header_text.pack(side="left", padx=(22, 0))
+
+        self.auto_button.configure(
+            text="✨  ÖSSZERAKÁS" if compact else "✨  KÖTELEZŐK ÖSSZERAKÁSA",
+            padx=10 if compact else 18,
+        )
+        self.settings_button.configure(padx=10 if compact else 18)
+        self.back_button.configure(padx=10 if compact else 18)
+        self.start_button.configure(padx=12 if compact else 18)
+        self.status.configure(
+            font=("Arial", 10 if compact else 12, "bold"),
+            wraplength=max(120, width - (610 if compact else 690)),
+        )
 
     def _button(self, text: str, command, color: str, size: int = 12) -> tk.Button:
         return tk.Button(
@@ -385,6 +420,9 @@ class TudasJarganyGame(tk.Tk):
     def _show_build_controls(self) -> None:
         for widget in (self.left_button, self.right_button, self.horn_button, self.back_button, self.auto_button, self.settings_button, self.start_button, self.status):
             widget.pack_forget()
+        # A jobb oldali indulásgombot foglaljuk le elsőként. A pack így szűk
+        # ablaknál sem engedi, hogy a középső állapotszöveg kitolja a képből.
+        self.start_button.pack(side="right")
         self.back_button.configure(text="↻  ELÖLRŐL", command=self._reset_build)
         self.back_button.pack(side="left")
         if not self._is_special_game_mode():
@@ -392,7 +430,7 @@ class TudasJarganyGame(tk.Tk):
         if not self._is_unicorn_mode():
             self.settings_button.pack(side="left", padx=(9, 0))
         self.status.pack(side="left", expand=True, padx=14)
-        self.start_button.pack(side="right")
+        self._apply_responsive_layout()
     def _show_task_settings(self) -> None:
         """A muhelyben valaszthato ki, mely tantargyakbol jojjenek feladatok."""
         if self.mode != "build":
@@ -416,7 +454,7 @@ class TudasJarganyGame(tk.Tk):
         ).pack(pady=(28, 8))
         tk.Label(
             popup, text="Jel\u00f6ld be a gyakorolni k\u00edv\u00e1nt tant\u00e1rgyakat!",
-            font=("Arial", 12), bg="#FFF7D1", fg=INK,
+            font=("Arial", 12), bg="#FFF7D1", fg=INK, wraplength=390,
         ).pack(pady=(0, 14))
         choices = tk.Frame(popup, bg="#FFF7D1")
         choices.pack()
@@ -472,6 +510,7 @@ class TudasJarganyGame(tk.Tk):
             self.horn_button.pack(side="left", padx=(8, 0))
         self.status.pack(side="left", expand=True, padx=10)
         self.right_button.pack(side="right")
+        self._apply_responsive_layout()
     def _draw(self) -> None:
         if self.mode == "build":
             self._draw_workshop()
@@ -561,8 +600,9 @@ class TudasJarganyGame(tk.Tk):
         self.canvas.create_oval(center_x - 125, height - 195, center_x + 125, height + 40, fill="#F5F5F5", outline="")
         self._draw_helicopter(center_x, height - 180)
         self.canvas.create_text(center_x, 66, text="HELIKOPTERES MENTŐREPÜLÉS", font=("Arial", 21, "bold"), fill="#1565C0")
-        self.canvas.create_text(center_x, 102, text="Gyűjts csillagokat, és kerüld ki a felhőket, madarakat, repülőket!", font=("Arial", 13, "bold"), fill=INK)
-        self.canvas.create_text(center_x, height - 36, text="A helikopter indulásra kész - kattints az INDULÁS gombra!", font=("Arial", 14, "bold"), fill="#155A35")
+        text_width = max(360, min(760, width - 80))
+        self.canvas.create_text(center_x, 102, text="Gyűjts csillagokat, és kerüld ki a felhőket, madarakat, repülőket!", font=("Arial", 13, "bold"), fill=INK, width=text_width, justify="center")
+        self.canvas.create_text(center_x, height - 36, text="A helikopter indulásra kész - kattints az INDULÁS gombra!", font=("Arial", 14, "bold"), fill="#155A35", width=text_width, justify="center")
     def _draw_color_picker(self) -> None:
         """Nagy, egérrel kattintható színmintákat rajzol a műhelybe."""
         self.canvas.create_rectangle(
@@ -1501,7 +1541,7 @@ class TudasJarganyGame(tk.Tk):
         tk.Label(
             popup,
             text=f"{self.challenge_reason}{progress_text}\nVálaszd ki a helyes választ!",
-            font=("Arial", 12), bg="#FFF7D1", fg=INK
+            font=("Arial", 12), bg="#FFF7D1", fg=INK, wraplength=460,
         ).pack(pady=(0, 8))
         timer_label = tk.Label(
             popup, text=f"⏱  {TASK_TIME_LIMIT} másodperc",
@@ -1512,6 +1552,7 @@ class TudasJarganyGame(tk.Tk):
             popup, text=task.prompt,
             font=("Arial", 32, "bold"), bg="white", fg=INK,
             padx=30, pady=15, relief="solid", borderwidth=2,
+            wraplength=430, justify="center",
             cursor="hand2" if task.subject == "ANGOL" and not task.choices_in_english else "",
         )
         prompt_label.pack()
@@ -1530,7 +1571,8 @@ class TudasJarganyGame(tk.Tk):
         answers.pack(pady=20)
         feedback = tk.Label(
             popup, text="Kattints a helyes válaszra!",
-            font=("Arial", 12, "bold"), bg="#FFF7D1", fg="#526D7A"
+            font=("Arial", 12, "bold"), bg="#FFF7D1", fg="#526D7A",
+            wraplength=460, justify="center",
         )
         feedback.pack()
         buttons: list[tk.Button] = []
