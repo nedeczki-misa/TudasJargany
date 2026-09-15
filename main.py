@@ -98,6 +98,10 @@ class TudasJarganyGame(tk.Tk):
         self.dragged: Part | None = None
         self.drag_offset = (0.0, 0.0)
         self.animation_job: str | None = None
+        self.resize_job: str | None = None
+        self.canvas_width = 1
+        self.canvas_height = 1
+        self.last_drive_status: tuple[str, str, int] | None = None
         self.assembly_run = 0
         self.auto_assembling = False
         self.car_color = BRICK_RED
@@ -279,13 +283,28 @@ class TudasJarganyGame(tk.Tk):
             return tray_left + 263 - part.width
         return tray_left + (310 - part.width) / 2
 
-    def _canvas_resized(self, _event=None) -> None:
+    def _canvas_resized(self, event=None) -> None:
+        """Elmenti az uj meretet, es egyetlen rajzolassa vonja ossze az esemenyeket."""
+        self.canvas_width = max(
+            1, int(event.width if event is not None else self.canvas.winfo_width())
+        )
+        self.canvas_height = max(
+            1, int(event.height if event is not None else self.canvas.winfo_height())
+        )
         if self.mode == "build":
-            height = max(1, self.canvas.winfo_height())
+            height = self.canvas_height
             for part in self.parts:
                 if not part.placed and part is not self.dragged:
                     part.x = self._tray_x(part)
                     part.y = min(part.tray_y, height - part.height - 10)
+        # Ablakatmeretezes kozben sok Configure esemeny erkezik egyszerre. A
+        # korabbi kod mindegyiknel ujrarajzolta a teljes vasznat, ami akadozott.
+        if self.resize_job is not None:
+            self.after_cancel(self.resize_job)
+        self.resize_job = self.after_idle(self._finish_canvas_resize)
+
+    def _finish_canvas_resize(self) -> None:
+        self.resize_job = None
         self._draw()
 
     def _reset_build(self) -> None:
@@ -932,6 +951,7 @@ class TudasJarganyGame(tk.Tk):
         self.lane, self.frame, self.score, self.lives = 1, 0, 0, 3
         self.speed_level, self.road_speed = 0, BASE_ROAD_SPEED
         self.speed_just_increased = False
+        self.last_drive_status = None
         self.pending_bonus_challenges = 0
         self.pending_life_challenges = 0
         self.road_items = []
@@ -951,7 +971,9 @@ class TudasJarganyGame(tk.Tk):
         self.focus_set()
         self._drive_tick()
     def _road_edges(self) -> tuple[float, float]:
-        width = self.canvas.winfo_width()
+        width = self.canvas_width
+        if width <= 1:
+            width = self.canvas.winfo_width()
         road_width = min(690, width - 170)
         return (width - road_width) / 2, (width + road_width) / 2
 
@@ -968,12 +990,23 @@ class TudasJarganyGame(tk.Tk):
 
     def _update_drive_status(self) -> None:
         if self._is_unicorn_mode():
-            self.status.configure(text=f"⭐  {self.score}", font=("Arial", 20, "bold"), fg="#C75DCE")
+            status = (f"⭐  {self.score}", "#C75DCE", 20)
+            if status != self.last_drive_status:
+                self.status.configure(
+                    text=status[0], font=("Arial", status[2], "bold"), fg=status[1]
+                )
+                self.last_drive_status = status
             return
-        self.status.configure(font=("Arial", 12, "bold"), fg=INK)
         hearts = "♥" * self.lives + "♡" * (3 - self.lives)
         vehicle_status = "Magasság: {0}. szint".format(self.speed_level + 1) if self._is_helicopter_mode() else "Sebesség: {0}. fokozat".format(self.speed_level + 1)
-        self.status.configure(text=f"★ {self.score}     |     {hearts}     |     {vehicle_status}")
+        status = (f"★ {self.score}     |     {hearts}     |     {vehicle_status}", INK, 12)
+        # A Label ujrakonfiguralasa meretezesi munkat indit a Tk-ben. Pontszam,
+        # elet vagy sebesseg valtozasa nelkul nincs mit frissiteni minden kepen.
+        if status != self.last_drive_status:
+            self.status.configure(
+                text=status[0], font=("Arial", status[2], "bold"), fg=status[1]
+            )
+            self.last_drive_status = status
     def _add_stars(self, amount: int) -> bool:
         """Hozzáadja a jutalmat, és kezeli a 10 csillagos mérföldköveket."""
         if self._is_unicorn_mode():
@@ -1144,7 +1177,8 @@ class TudasJarganyGame(tk.Tk):
             if kind == "dumper":
                 self.road_items.append(self._dumper_dirt_pile(lane))
 
-        car_y = self.canvas.winfo_height() - 128
+        height = self.canvas_height if self.canvas_height > 1 else self.canvas.winfo_height()
+        car_y = height - 128
         survivors = []
         hit_obstacle: str | None = None
         for item in self.road_items:
@@ -1169,7 +1203,7 @@ class TudasJarganyGame(tk.Tk):
                     hit_obstacle = str(item["kind"])
                     self._slow_down_after_collision(hit_obstacle)
                 continue
-            if float(item["y"]) < self.canvas.winfo_height() + 60:
+            if float(item["y"]) < height + 60:
                 survivors.append(item)
         self.road_items = survivors
         if self.message_frames:
