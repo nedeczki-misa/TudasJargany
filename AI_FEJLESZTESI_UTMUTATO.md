@@ -69,6 +69,7 @@ Az extrák nélkül is el lehet indulni. Vezetés közben csak a ténylegesen fe
 - Irányítás: képernyőgombok, bal/jobb nyílbillentyű, `A`/`D`, illetve közvetlen kattintás egy sávra.
 - Gyűjthető elem: csillag.
 - Akadályok: bója, másik személyautó, busz, cikázó vadmotoros és sávlezárás.
+- Helikopteres módban a kész helikopterrel kell a négy légi sávban csillagokat gyűjteni, felhőket és madarakat kikerülni; a tanulási, élet- és gyorsulási szabályok közösek az autós móddal.
 - A játékos három élettel indul.
 - Minden 10. csillagnál egy sebességfokozattal gyorsul az autó, amit rövid, emelkedő hangsor jelez.
 - Minden 10. csillag után bónuszfeladat jelenik meg.

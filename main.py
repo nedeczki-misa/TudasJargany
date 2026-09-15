@@ -61,6 +61,7 @@ CAR_COLORS = {
 }
 
 CAR_STYLES = ("VÁROSI AUTÓ", "SPORTAUTÓ", "TEREPJÁRÓ", "PICKUP")
+GAME_MODES = ("AUTÓS JÁTÉK", "HELIKOPTERES JÁTÉK")
 
 
 @dataclass
@@ -96,6 +97,7 @@ class TudasJarganyGame(tk.Tk):
         self.auto_assembling = False
         self.car_color = BRICK_RED
         self.car_style = tk.StringVar(value=CAR_STYLES[0])
+        self.game_mode = tk.StringVar(value=GAME_MODES[0])
         self.color_boxes: list[tuple[float, float, float, float, str, str]] = []
         self.parts = self._make_parts()
 
@@ -182,6 +184,24 @@ class TudasJarganyGame(tk.Tk):
         )
         style_menu["menu"].configure(font=("Arial", 10))
         style_menu.pack(side="left")
+
+        game_box = tk.Frame(header, bg="#1565C0")
+        game_box.pack(side="right", padx=(0, 16))
+        tk.Label(
+            game_box, text="JÁTÉK:", font=("Arial", 10, "bold"),
+            bg="#1565C0", fg="white"
+        ).pack(side="left", padx=(0, 7))
+        game_menu = tk.OptionMenu(
+            game_box, self.game_mode, *GAME_MODES,
+            command=lambda _value: self._change_game_mode()
+        )
+        game_menu.configure(
+            font=("Arial", 10, "bold"), bg="#78D2E8", fg=INK,
+            activebackground="#A3E7F5", relief="flat", width=18,
+            highlightthickness=0, cursor="hand2"
+        )
+        game_menu["menu"].configure(font=("Arial", 10))
+        game_menu.pack(side="left")
 
         self.canvas = tk.Canvas(self, bg=BG, highlightthickness=0, cursor="hand2")
         self.canvas.pack(fill="both", expand=True)
@@ -289,12 +309,37 @@ class TudasJarganyGame(tk.Tk):
         self._show_build_controls()
         self._draw()
 
+    def _is_helicopter_mode(self) -> bool:
+        return self.game_mode.get() == "HELIKOPTERES JÁTÉK"
+
+    def _change_game_mode(self) -> None:
+        if self.mode != "build":
+            return
+        self.dragged = None
+        if self._is_helicopter_mode():
+            self.auto_assembling = False
+            self.auto_button.configure(state="disabled")
+            self.start_button.configure(state="normal", bg=BRICK_GREEN, fg="white")
+            self.header_text.configure(text="Helikopteres mentőrepülés indulásra kész!")
+            self.status.configure(text="Válaszd az INDULÁS gombot a helikopterhez!", fg="#238636")
+        else:
+            ready = all(part.placed for part in self.parts if part.required)
+            self.auto_button.configure(state="normal")
+            self.start_button.configure(
+                state="normal" if ready else "disabled",
+                bg=BRICK_GREEN if ready else "#B9C8D0",
+            )
+            self.header_text.configure(text="Építsd meg, aztán irány az utca!")
+            self.status.configure(text="Húzd a építőkockákat a szaggatott helyükre!", fg=INK)
+        self._show_build_controls()
+        self._draw_workshop()
     def _show_build_controls(self) -> None:
         for widget in (self.left_button, self.right_button, self.horn_button, self.back_button, self.auto_button, self.settings_button, self.start_button, self.status):
             widget.pack_forget()
         self.back_button.configure(text="↻  ELÖLRŐL", command=self._reset_build)
         self.back_button.pack(side="left")
-        self.auto_button.pack(side="left", padx=(9, 0))
+        if not self._is_helicopter_mode():
+            self.auto_button.pack(side="left", padx=(9, 0))
         self.settings_button.pack(side="left", padx=(9, 0))
         self.status.pack(side="left", expand=True, padx=14)
         self.start_button.pack(side="right")
@@ -368,7 +413,8 @@ class TudasJarganyGame(tk.Tk):
         self.back_button.configure(text="🔧  MŰHELY", command=self._reset_build)
         self.back_button.pack(side="left", padx=(0, 10))
         self.left_button.pack(side="left")
-        self.horn_button.pack(side="left", padx=(8, 0))
+        if not self._is_helicopter_mode():
+            self.horn_button.pack(side="left", padx=(8, 0))
         self.status.pack(side="left", expand=True, padx=10)
         self.right_button.pack(side="right")
 
@@ -381,6 +427,9 @@ class TudasJarganyGame(tk.Tk):
     def _draw_workshop(self) -> None:
         self.canvas.delete("all")
         width, height = self.canvas.winfo_width(), self.canvas.winfo_height()
+        if self._is_helicopter_mode():
+            self._draw_helicopter_workshop()
+            return
         self.canvas.create_rectangle(0, 0, width, height, fill=BG, outline="")
         self.canvas.create_rectangle(0, height - 105, width, height, fill="#D5E5EA", outline="")
         for x in range(0, width, 80):
@@ -435,6 +484,18 @@ class TudasJarganyGame(tk.Tk):
             fill="#26734D" if required_done == required_total else "#55738A"
         )
 
+    def _draw_helicopter_workshop(self) -> None:
+        """Kesz helikoptert mutat, amikor a helikopteres jatek van kivalasztva."""
+        width, height = self.canvas.winfo_width(), self.canvas.winfo_height()
+        self.canvas.create_rectangle(0, 0, width, height, fill="#CDEFFF", outline="")
+        self.canvas.create_rectangle(0, height - 120, width, height, fill="#9AD486", outline="")
+        center_x = width * 0.47
+        self.canvas.create_oval(center_x - 175, height - 245, center_x + 175, height + 90, fill="#738B95", outline="#455A64", width=4)
+        self.canvas.create_oval(center_x - 125, height - 195, center_x + 125, height + 40, fill="#F5F5F5", outline="")
+        self._draw_helicopter(center_x, height - 180)
+        self.canvas.create_text(center_x, 66, text="HELIKOPTERES MENTŐREPÜLÉS", font=("Arial", 21, "bold"), fill="#1565C0")
+        self.canvas.create_text(center_x, 102, text="Gyűjts csillagokat a levegőben, és kerüld ki a felhőket meg a madarakat!", font=("Arial", 13, "bold"), fill=INK)
+        self.canvas.create_text(center_x, height - 36, text="A helikopter indulásra kész - kattints az INDULÁS gombra!", font=("Arial", 14, "bold"), fill="#155A35")
     def _draw_color_picker(self) -> None:
         """Nagy, egérrel kattintható színmintákat rajzol a műhelybe."""
         self.canvas.create_rectangle(
@@ -708,6 +769,8 @@ class TudasJarganyGame(tk.Tk):
         return f"#{red:02X}{green:02X}{blue:02X}"
 
     def _mouse_down(self, event) -> None:
+        if self.mode == "build" and self._is_helicopter_mode():
+            return
         if self.mode == "drive":
             road_left, road_right = self._road_edges()
             if road_left < event.x < road_right:
@@ -731,7 +794,7 @@ class TudasJarganyGame(tk.Tk):
                 break
 
     def _mouse_drag(self, event) -> None:
-        if self.mode == "build" and self.dragged:
+        if self.mode == "build" and not self._is_helicopter_mode() and self.dragged:
             wanted_x = event.x - self.drag_offset[0]
             wanted_y = event.y - self.drag_offset[1]
             self.dragged.x = max(
@@ -743,7 +806,7 @@ class TudasJarganyGame(tk.Tk):
             self._draw_workshop()
 
     def _mouse_up(self, _event) -> None:
-        if self.mode != "build" or not self.dragged:
+        if self.mode != "build" or self._is_helicopter_mode() or not self.dragged:
             return
         part = self.dragged
         tx, ty = self._target(part)
@@ -814,7 +877,7 @@ class TudasJarganyGame(tk.Tk):
         self.after(280, lambda: self._auto_place_next(parts, index + 1, run))
 
     def _start_driving(self) -> None:
-        if not all(part.placed for part in self.parts if part.required):
+        if not self._is_helicopter_mode() and not all(part.placed for part in self.parts if part.required):
             return
         self._stop_siren()
         self.mode = "drive"
@@ -826,10 +889,11 @@ class TudasJarganyGame(tk.Tk):
         self.road_items = []
         self.message, self.message_frames = "RAJT!", 45
         self.math_active = False
-        self.header_text.configure(text="Gyűjts csillagokat, kerüld ki az akadályokat!")
+        self.header_text.configure(text="Repülj csillagokat gyűjteni, és kerüld ki a felhőket!" if self._is_helicopter_mode() else "Gyűjts csillagokat, kerüld ki az akadályokat!")
         self._show_drive_controls()
         self._play_sound_effect("engine_start")
-        self.after(950, self._start_siren_loop)
+        if not self._is_helicopter_mode():
+            self.after(950, self._start_siren_loop)
         self._update_drive_status()
         self.focus_set()
         self._drive_tick()
@@ -852,8 +916,9 @@ class TudasJarganyGame(tk.Tk):
 
     def _update_drive_status(self) -> None:
         hearts = "♥" * self.lives + "♡" * (3 - self.lives)
+        vehicle_status = "Magasság: {0}. szint".format(self.speed_level + 1) if self._is_helicopter_mode() else "Sebesség: {0}. fokozat".format(self.speed_level + 1)
         self.status.configure(
-            text=f"★ {self.score}     |     {hearts}     |     Sebesség: {self.speed_level + 1}. fokozat"
+            text=f"★ {self.score}     |     {hearts}     |     {vehicle_status}"
         )
 
     def _add_stars(self, amount: int) -> bool:
@@ -924,21 +989,23 @@ class TudasJarganyGame(tk.Tk):
         self._play_tones(fallback.get(name, ((523, 100),)))
 
     def _play_collision_sound(self, obstacle_kind: str) -> None:
+        if obstacle_kind in ("cloud", "bird"):
+            self._play_sound_effect("collision_light")
+            return
         self._play_sound_effect("brake_screech")
         impact = "collision_light" if obstacle_kind == "cone" else "collision_heavy"
         self.after(170, lambda: self._play_sound_effect(impact))
-
     def _play_speed_up_sound(self) -> None:
         self._play_sound_effect("speed_up")
 
     def _honk(self) -> None:
-        if self.mode == "drive" and not self.math_active:
+        if self.mode == "drive" and not self.math_active and not self._is_helicopter_mode():
             self._play_sound_effect("horn")
 
     def _start_siren_loop(self) -> None:
         has_siren = any(part.kind == "siren" and part.placed for part in self.parts)
         sound_file = SOUND_FILES["siren_loop"]
-        if self.mode == "drive" and not self.math_active and has_siren and winsound is not None and sound_file.is_file():
+        if self.mode == "drive" and not self._is_helicopter_mode() and not self.math_active and has_siren and winsound is not None and sound_file.is_file():
             winsound.PlaySound(str(sound_file), winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_LOOP)
             self.siren_running = True
 
@@ -947,8 +1014,14 @@ class TudasJarganyGame(tk.Tk):
             winsound.PlaySound(None, 0)
         self.siren_running = False
     @staticmethod
-    def _random_road_kind() -> str:
+    def _random_road_kind(helicopter: bool = False) -> str:
         roll = random.random()
+        if helicopter:
+            if roll < 0.58:
+                return "star"
+            if roll < 0.80:
+                return "cloud"
+            return "bird"
         if roll < 0.50:
             return "star"
         if roll < 0.65:
@@ -960,7 +1033,6 @@ class TudasJarganyGame(tk.Tk):
         if roll < 0.94:
             return "bus"
         return "closure"
-
     @staticmethod
     def _move_wild_motorcycle(item: dict[str, float | int | str]) -> None:
         """A motoros sávok közt cikázik, de nem hagyhatja el az utat."""
@@ -984,7 +1056,7 @@ class TudasJarganyGame(tk.Tk):
         if self.frame % 48 == 0:
             occupied = {int(item["lane"]) for item in self.road_items if float(item["y"]) < 120}
             free_lanes = [lane for lane in range(4) if lane not in occupied] or [0, 1, 2, 3]
-            kind = self._random_road_kind()
+            kind = self._random_road_kind(self._is_helicopter_mode())
             lane = random.choice(free_lanes)
             item: dict[str, float | int | str] = {"kind": kind, "lane": lane, "y": -45.0}
             if kind == "motorcycle":
@@ -1032,6 +1104,8 @@ class TudasJarganyGame(tk.Tk):
                 "motorcycle": "Egy vadmotoros eléd cikázott!",
                 "bus": "Túl közel kerültél a buszhoz.",
                 "closure": "Behajtottál a lezárt sávba!",
+                "cloud": "Egy viharfelhőbe repültél!",
+                "bird": "Egy madár eléd repült!",
             }
             task_count = 3 if hit_obstacle == "closure" else 1
             self._begin_learning_challenge(
@@ -1346,6 +1420,9 @@ class TudasJarganyGame(tk.Tk):
             self._drive_tick()
 
     def _draw_road(self) -> None:
+        if self._is_helicopter_mode():
+            self._draw_flight_scene()
+            return
         self.canvas.delete("all")
         width, height = self.canvas.winfo_width(), self.canvas.winfo_height()
         left, right = self._road_edges()
@@ -1393,6 +1470,34 @@ class TudasJarganyGame(tk.Tk):
         if self.message_frames:
             self.canvas.create_text(width / 2, 60, text=self.message, font=("Arial", 22, "bold"), fill="white")
 
+    def _draw_flight_scene(self) -> None:
+        self.canvas.delete("all")
+        width, height = self.canvas.winfo_width(), self.canvas.winfo_height()
+        self.canvas.create_rectangle(0, 0, width, height, fill="#88D8FF", outline="")
+        self.canvas.create_oval(width - 125, 28, width - 55, 98, fill=BRICK_YELLOW, outline="")
+        self.canvas.create_rectangle(0, height - 105, width, height, fill="#83C96A", outline="")
+        for cloud_x, cloud_y, scale in ((90, 95, 0.8), (width - 180, 160, 0.65), (width * 0.48, 82, 0.45)):
+            self._draw_cloud(cloud_x, cloud_y, scale, "#F5FCFF")
+        left, right = self._road_edges()
+        lane_width = (right - left) / 4
+        for divider in (left + lane_width, left + lane_width * 2, left + lane_width * 3):
+            self.canvas.create_line(divider, 80, divider, height - 110, fill="#D8F4FF", width=2, dash=(8, 12))
+        self.canvas.create_text(width / 2, 34, text="HELIKOPTERES MENTŐREPÜLÉS", font=("Arial", 15, "bold"), fill="#17324D")
+        self.canvas.create_rectangle(right - 185, 48, right - 14, 84, fill="#17324D", outline="white", width=2)
+        self.canvas.create_text(right - 99, 66, text=f"REPÜLÉS: {self.speed_level + 1}. SZINT", font=("Arial", 10, "bold"), fill="white")
+        for item in self.road_items:
+            x = self._lane_x(float(item.get("lane_position", item["lane"])))
+            y = float(item["y"])
+            kind = item["kind"]
+            if kind == "star":
+                self._draw_star(x, y, 27)
+            elif kind == "cloud":
+                self._draw_cloud(x, y, 1.0, "#607D8B")
+            elif kind == "bird":
+                self._draw_bird(x, y)
+        self._draw_helicopter(self._lane_x(self.lane), height - 135)
+        if self.message_frames:
+            self.canvas.create_text(width / 2, 105, text=self.message, font=("Arial", 22, "bold"), fill="white")
     def _draw_houses(self, left: float, right: float) -> None:
         for side_x in (left - 105, right + 105):
             for index in range(5):
@@ -1478,6 +1583,34 @@ class TudasJarganyGame(tk.Tk):
         self.canvas.create_line(x - 26 + lean, y + 17, x + 25 + lean, y + 17, fill="#BDEBFF", width=4)
         self.canvas.create_line(x - 38, y + 46, x - 57, y + 64, fill="#F7D24C", width=3)
         self.canvas.create_line(x + 38, y + 46, x + 57, y + 64, fill="#F7D24C", width=3)
+    def _draw_helicopter(self, x: float, y: float) -> None:
+        rotor_angle = self.frame * 0.45
+        rotor_length = 82
+        dx = math.cos(rotor_angle) * rotor_length
+        dy = math.sin(rotor_angle) * rotor_length * 0.22
+        self.canvas.create_line(x - dx, y - 67 - dy, x + dx, y - 67 + dy, fill="#263238", width=5)
+        self.canvas.create_line(x, y - 58, x, y - 75, fill="#37474F", width=4)
+        self.canvas.create_polygon(x + 35, y - 6, x + 88, y + 10, x + 88, y + 21, x + 31, y + 28, fill=self.car_color, outline="#452060", width=3)
+        self.canvas.create_polygon(x + 80, y + 8, x + 112, y - 11, x + 112, y + 32, fill="#FBC02D", outline="#715800", width=2)
+        self.canvas.create_oval(x - 54, y - 43, x + 43, y + 42, fill=self.car_color, outline="#452060", width=4)
+        self.canvas.create_oval(x - 36, y - 32, x + 19, y + 14, fill="#BDEBFF", outline="#0D4775", width=3)
+        self.canvas.create_line(x - 43, y + 49, x + 47, y + 49, fill="#263238", width=5)
+        self.canvas.create_line(x - 28, y + 40, x - 43, y + 57, fill="#263238", width=4)
+        self.canvas.create_line(x + 24, y + 40, x + 40, y + 57, fill="#263238", width=4)
+
+    def _draw_cloud(self, x: float, y: float, scale: float, color: str) -> None:
+        outline = "#455A64" if color != "#F5FCFF" else "#D0EAF5"
+        self.canvas.create_oval(x - 48 * scale, y - 4 * scale, x - 3 * scale, y + 31 * scale, fill=color, outline=outline)
+        self.canvas.create_oval(x - 25 * scale, y - 27 * scale, x + 28 * scale, y + 31 * scale, fill=color, outline=outline)
+        self.canvas.create_oval(x + 6 * scale, y - 12 * scale, x + 52 * scale, y + 31 * scale, fill=color, outline=outline)
+        if color != "#F5FCFF":
+            for offset in (-22, 0, 22):
+                self.canvas.create_line(x + offset * scale, y + 37 * scale, x + (offset - 5) * scale, y + 51 * scale, fill="#D9F3FC", width=3)
+
+    def _draw_bird(self, x: float, y: float) -> None:
+        flap = 8 if self.frame % 10 < 5 else -5
+        self.canvas.create_line(x - 37, y + flap, x, y - 8, x + 37, y + flap, fill="#4B2630", width=5, smooth=True)
+        self.canvas.create_oval(x - 7, y - 10, x + 8, y + 7, fill="#263238", outline="#111820")
     def _draw_other_car(self, x: float, y: float) -> None:
         self.canvas.create_oval(x - 45, y - 42, x - 31, y + 43, fill="#1D2529", outline="")
         self.canvas.create_oval(x + 31, y - 42, x + 45, y + 43, fill="#1D2529", outline="")
