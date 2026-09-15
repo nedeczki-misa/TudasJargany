@@ -528,7 +528,7 @@ class TudasJarganyGame(tk.Tk):
         self.canvas.create_oval(center_x - 125, height - 195, center_x + 125, height + 40, fill="#F5F5F5", outline="")
         self._draw_helicopter(center_x, height - 180)
         self.canvas.create_text(center_x, 66, text="HELIKOPTERES MENTŐREPÜLÉS", font=("Arial", 21, "bold"), fill="#1565C0")
-        self.canvas.create_text(center_x, 102, text="Gyűjts csillagokat a levegőben, és kerüld ki a felhőket meg a madarakat!", font=("Arial", 13, "bold"), fill=INK)
+        self.canvas.create_text(center_x, 102, text="Gyűjts csillagokat, és kerüld ki a felhőket, madarakat, repülőket!", font=("Arial", 13, "bold"), fill=INK)
         self.canvas.create_text(center_x, height - 36, text="A helikopter indulásra kész - kattints az INDULÁS gombra!", font=("Arial", 14, "bold"), fill="#155A35")
     def _draw_color_picker(self) -> None:
         """Nagy, egérrel kattintható színmintákat rajzol a műhelybe."""
@@ -926,7 +926,7 @@ class TudasJarganyGame(tk.Tk):
         if self._is_unicorn_mode():
             self.header_text.configure(text="🦄  Kata unikornisa  🦄")
         elif self._is_helicopter_mode():
-            self.header_text.configure(text="Repülj csillagokat gyűjteni, és kerüld ki a felhőket!")
+            self.header_text.configure(text="Repülj csillagokat gyűjteni, és kerüld ki a felhőket, madarakat, repülőket!")
         else:
             self.header_text.configure(text="Gyűjts csillagokat, kerüld ki az akadályokat!")
         self._show_drive_controls()
@@ -1031,7 +1031,7 @@ class TudasJarganyGame(tk.Tk):
         self._play_tones(fallback.get(name, ((523, 100),)))
 
     def _play_collision_sound(self, obstacle_kind: str) -> None:
-        if obstacle_kind in ("cloud", "bird"):
+        if obstacle_kind in ("cloud", "bird", "plane"):
             self._play_sound_effect("collision_light")
             return
         self._play_sound_effect("brake_screech")
@@ -1065,7 +1065,9 @@ class TudasJarganyGame(tk.Tk):
                 return "star"
             if roll < 0.80:
                 return "cloud"
-            return "bird"
+            if roll < 0.92:
+                return "bird"
+            return "plane"
         if roll < 0.50:
             return "star"
         if roll < 0.65:
@@ -1074,9 +1076,18 @@ class TudasJarganyGame(tk.Tk):
             return "motorcycle"
         if roll < 0.86:
             return "car"
-        if roll < 0.94:
+        if roll < 0.93:
             return "bus"
+        if roll < 0.96:
+            return "asphalt_paver"
+        if roll < 0.98:
+            return "dumper"
         return "closure"
+
+    @staticmethod
+    def _dumper_dirt_pile(lane: int) -> dict[str, float | int | str]:
+        """A dömper után egy földkupac marad ugyanabban a sávban."""
+        return {"kind": "dirt_pile", "lane": lane, "y": -150.0}
     @staticmethod
     def _move_wild_motorcycle(item: dict[str, float | int | str]) -> None:
         """A motoros sávok közt cikázik, de nem hagyhatja el az utat."""
@@ -1108,6 +1119,8 @@ class TudasJarganyGame(tk.Tk):
                 item["lane_position"] = float(lane)
                 item["lane_direction"] = random.choice((-1.0, 1.0))
             self.road_items.append(item)
+            if kind == "dumper":
+                self.road_items.append(self._dumper_dirt_pile(lane))
 
         car_y = self.canvas.winfo_height() - 128
         survivors = []
@@ -1116,7 +1129,7 @@ class TudasJarganyGame(tk.Tk):
             item["y"] = float(item["y"]) + self.road_speed
             if item["kind"] == "motorcycle":
                 self._move_wild_motorcycle(item)
-            collision_distance = 72 if item["kind"] == "closure" else 54
+            collision_distance = 72 if item["kind"] in ("closure", "asphalt_paver", "dumper") else 54
             if (
                 hit_obstacle is None
                 and abs(float(item.get("lane_position", item["lane"])) - self.lane) < 0.43
@@ -1148,9 +1161,13 @@ class TudasJarganyGame(tk.Tk):
                 "car": "Összekoccantál egy másik autóval.",
                 "motorcycle": "Egy vadmotoros eléd cikázott!",
                 "bus": "Túl közel kerültél a buszhoz.",
+                "asphalt_paver": "Az aszfaltozó gép elállta az utat!",
+                "dumper": "A dömper útjába kerültél!",
+                "dirt_pile": "A földkupacba hajtottál!",
                 "closure": "Behajtottál a lezárt sávba!",
                 "cloud": "Egy viharfelhőbe repültél!",
                 "bird": "Egy madár eléd repült!",
+                "plane": "Egy repülő keresztezte az utadat!",
             }
             task_count = 3 if hit_obstacle == "closure" else 1
             self._begin_learning_challenge(
@@ -1514,6 +1531,12 @@ class TudasJarganyGame(tk.Tk):
                 self._draw_wild_motorcycle(x, y, float(item.get("lane_direction", 1.0)))
             elif kind == "bus":
                 self._draw_bus(x, y)
+            elif kind == "asphalt_paver":
+                self._draw_asphalt_paver(x, y)
+            elif kind == "dumper":
+                self._draw_dumper(x, y)
+            elif kind == "dirt_pile":
+                self._draw_dirt_pile(x, y)
             else:
                 self._draw_lane_closure(x, y)
         self._draw_driving_car(self._lane_x(self.lane), height - 128)
@@ -1562,6 +1585,8 @@ class TudasJarganyGame(tk.Tk):
                 self._draw_cloud(x, y, 1.0, "#607D8B")
             elif kind == "bird":
                 self._draw_bird(x, y)
+            elif kind == "plane":
+                self._draw_plane(x, y)
         self._draw_helicopter(self._lane_x(self.lane), height - 135)
         if self.message_frames:
             self.canvas.create_text(width / 2, 105, text=self.message, font=("Arial", 22, "bold"), fill="white")
@@ -1704,6 +1729,18 @@ class TudasJarganyGame(tk.Tk):
         flap = 8 if self.frame % 10 < 5 else -5
         self.canvas.create_line(x - 37, y + flap, x, y - 8, x + 37, y + flap, fill="#4B2630", width=5, smooth=True)
         self.canvas.create_oval(x - 7, y - 10, x + 8, y + 7, fill="#263238", outline="#111820")
+
+    def _draw_plane(self, x: float, y: float) -> None:
+        """Kis utasszállító repülő felülnézetben a légi pályához."""
+        self.canvas.create_polygon(
+            x, y - 55, x + 17, y - 15, x + 58, y + 8,
+            x + 54, y + 21, x + 16, y + 10, x + 10, y + 53,
+            x - 10, y + 53, x - 16, y + 10, x - 54, y + 21,
+            x - 58, y + 8, x - 17, y - 15,
+            fill="#F5F5F5", outline="#315C6A", width=3,
+        )
+        self.canvas.create_polygon(x - 8, y - 23, x + 8, y - 23, x + 8, y + 4, x - 8, y + 4, fill="#2E86C1", outline="")
+        self.canvas.create_line(x - 40, y + 13, x + 40, y + 13, fill="#E53935", width=4)
     def _draw_other_car(self, x: float, y: float) -> None:
         self.canvas.create_oval(x - 45, y - 42, x - 31, y + 43, fill="#1D2529", outline="")
         self.canvas.create_oval(x + 31, y - 42, x + 45, y + 43, fill="#1D2529", outline="")
@@ -1720,6 +1757,29 @@ class TudasJarganyGame(tk.Tk):
         self.canvas.create_rectangle(x - 32, y + 54, x - 13, y + 66, fill="#E53935", outline="")
         self.canvas.create_rectangle(x + 13, y + 54, x + 32, y + 66, fill="#E53935", outline="")
         self.canvas.create_text(x, y - 35, text="BUSZ", font=("Arial", 10, "bold"), fill=INK)
+
+    def _draw_asphalt_paver(self, x: float, y: float) -> None:
+        """Sárga aszfaltozó gép, amely elfoglal egy teljes sávot."""
+        self.canvas.create_rectangle(x - 52, y - 55, x + 52, y + 52, fill="#F4B400", outline="#6D5200", width=3)
+        self.canvas.create_rectangle(x - 31, y - 42, x + 31, y - 5, fill="#BDEBFF", outline="#315C6A", width=2)
+        self.canvas.create_rectangle(x - 68, y + 25, x + 68, y + 62, fill="#455A64", outline="#263238", width=3)
+        for wheel_x in (-38, 38):
+            self.canvas.create_oval(x + wheel_x - 13, y + 36, x + wheel_x + 13, y + 62, fill="#20262A", outline="#101418")
+        self.canvas.create_text(x, y + 10, text="ASZFALT", font=("Arial", 8, "bold"), fill="#3E2B00")
+
+    def _draw_dumper(self, x: float, y: float) -> None:
+        """Narancssárga dömper földdel megrakva."""
+        self.canvas.create_rectangle(x - 48, y - 58, x + 48, y + 56, fill="#F57C00", outline="#6D3A00", width=3)
+        self.canvas.create_polygon(x - 40, y - 47, x + 40, y - 47, x + 29, y - 4, x - 29, y - 4, fill="#8D5A3B", outline="#5D4037", width=2)
+        self.canvas.create_rectangle(x - 32, y + 4, x + 32, y + 41, fill="#BDEBFF", outline="#315C6A", width=2)
+        for wheel_x in (-35, 35):
+            self.canvas.create_oval(x + wheel_x - 12, y + 38, x + wheel_x + 12, y + 62, fill="#20262A", outline="#101418")
+        self.canvas.create_text(x, y + 23, text="DÖMPER", font=("Arial", 8, "bold"), fill="#4B2630")
+
+    def _draw_dirt_pile(self, x: float, y: float) -> None:
+        self.canvas.create_oval(x - 52, y - 8, x + 52, y + 34, fill="#8D5A3B", outline="#5D4037", width=3)
+        self.canvas.create_oval(x - 30, y - 27, x + 30, y + 26, fill="#A97148", outline="#5D4037", width=2)
+        self.canvas.create_text(x, y + 6, text="FÖLD", font=("Arial", 8, "bold"), fill="#FFF3D6")
 
     def _draw_lane_closure(self, x: float, y: float) -> None:
         self.canvas.create_rectangle(x - 88, y - 30, x + 88, y + 30, fill="#F5F5F5", outline="#5D4037", width=4)

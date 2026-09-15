@@ -20,6 +20,18 @@ class WildMotorcycleTests(unittest.TestCase):
             self.assertIn(int(item["lane"]), range(4))
         self.assertGreater(len({round(position, 2) for position in positions}), 8)
 
+    def test_car_mode_includes_roadwork_vehicles(self) -> None:
+        with patch("main.random.random", return_value=0.94):
+            self.assertEqual(TudasJarganyGame._random_road_kind(), "asphalt_paver")
+        with patch("main.random.random", return_value=0.97):
+            self.assertEqual(TudasJarganyGame._random_road_kind(), "dumper")
+
+    def test_dumper_leaves_a_dirt_pile_in_its_lane(self) -> None:
+        dirt_pile = TudasJarganyGame._dumper_dirt_pile(3)
+        self.assertEqual(dirt_pile["kind"], "dirt_pile")
+        self.assertEqual(dirt_pile["lane"], 3)
+        self.assertLess(float(dirt_pile["y"]), -45.0)
+
 
 if __name__ == "__main__":
     unittest.main()
