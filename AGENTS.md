@@ -15,7 +15,7 @@ Az agent munkarendje:
 3. A gyermeknek szánt játékfeliratok maradjanak rövidek, pozitívak és jól olvashatók.
 4. Új működéshez készítsen vagy módosítson automatikus tesztet, amikor ez ésszerűen lehetséges.
 5. Futtassa legalább a `python -m unittest -v` tesztcsomagot, és jelezze az eredményt.
-6. Minden elkészült változtatást helyi Git commitba kell menteni. Az AI Kolos kérésére is elkészítheti és commitolhatja ezeket a helyi commitokat.
+6. Minden elkészült változtatást helyi Git commitba kell menteni. Ha Kolos változtatást kér, az AI a sikeres ellenőrzés után automatikusan készítse el a hozzá tartozó helyi commitot, külön kérés nélkül.
 7. GitHubra feltölteni (`git push`) kizárólag Misa jogosult; az AI soha ne pusholjon, Misa kérésére sem.
 8. Ne küldjön üzenetet és ne használjon külső szolgáltatást Misa kifejezett kérése nélkül.
 ## Közös fejlesztés: Kolos és Misa
