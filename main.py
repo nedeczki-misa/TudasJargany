@@ -61,7 +61,7 @@ CAR_COLORS = {
 }
 
 CAR_STYLES = ("VÁROSI AUTÓ", "SPORTAUTÓ", "TEREPJÁRÓ", "PICKUP")
-GAME_MODES = ("AUTÓS JÁTÉK", "HELIKOPTERES JÁTÉK")
+GAME_MODES = ("AUTÓS JÁTÉK", "HELIKOPTERES JÁTÉK", "KATA UNIKORNISA")
 
 
 @dataclass
@@ -306,11 +306,20 @@ class TudasJarganyGame(tk.Tk):
         self.status.configure(text="Húzd a építőkockákat a szaggatott helyükre!", fg=INK)
         self.start_button.configure(state="disabled", bg="#B9C8D0")
         self.auto_button.configure(state="normal")
-        self._show_build_controls()
-        self._draw()
+        if self._is_special_game_mode():
+            self._change_game_mode()
+        else:
+            self._show_build_controls()
+            self._draw()
 
     def _is_helicopter_mode(self) -> bool:
         return self.game_mode.get() == "HELIKOPTERES JÁTÉK"
+
+    def _is_unicorn_mode(self) -> bool:
+        return self.game_mode.get() == "KATA UNIKORNISA"
+
+    def _is_special_game_mode(self) -> bool:
+        return self._is_helicopter_mode() or self._is_unicorn_mode()
 
     def _change_game_mode(self) -> None:
         if self.mode != "build":
@@ -319,13 +328,20 @@ class TudasJarganyGame(tk.Tk):
         if self._is_helicopter_mode():
             self.auto_assembling = False
             self.auto_button.configure(state="disabled")
-            self.start_button.configure(state="normal", bg=BRICK_GREEN, fg="white")
+            self.start_button.configure(text="INDULÁS!  ➜", state="normal", bg=BRICK_GREEN, fg="white")
             self.header_text.configure(text="Helikopteres mentőrepülés indulásra kész!")
             self.status.configure(text="Válaszd az INDULÁS gombot a helikopterhez!", fg="#238636")
+        elif self._is_unicorn_mode():
+            self.auto_assembling = False
+            self.auto_button.configure(state="disabled")
+            self.start_button.configure(text="▶  JÁTÉK", state="normal", bg="#C75DCE", fg="white")
+            self.header_text.configure(text="🦄 Kata unikornisa készen áll!")
+            self.status.configure(text="⭐", fg="#C75DCE")
         else:
             ready = all(part.placed for part in self.parts if part.required)
             self.auto_button.configure(state="normal")
             self.start_button.configure(
+                text="INDULÁS!  ➜",
                 state="normal" if ready else "disabled",
                 bg=BRICK_GREEN if ready else "#B9C8D0",
             )
@@ -338,12 +354,12 @@ class TudasJarganyGame(tk.Tk):
             widget.pack_forget()
         self.back_button.configure(text="↻  ELÖLRŐL", command=self._reset_build)
         self.back_button.pack(side="left")
-        if not self._is_helicopter_mode():
+        if not self._is_special_game_mode():
             self.auto_button.pack(side="left", padx=(9, 0))
-        self.settings_button.pack(side="left", padx=(9, 0))
+        if not self._is_unicorn_mode():
+            self.settings_button.pack(side="left", padx=(9, 0))
         self.status.pack(side="left", expand=True, padx=14)
         self.start_button.pack(side="right")
-
     def _show_task_settings(self) -> None:
         """A muhelyben valaszthato ki, mely tantargyakbol jojjenek feladatok."""
         if self.mode != "build":
@@ -412,12 +428,17 @@ class TudasJarganyGame(tk.Tk):
             widget.pack_forget()
         self.back_button.configure(text="🔧  MŰHELY", command=self._reset_build)
         self.back_button.pack(side="left", padx=(0, 10))
+        if self._is_unicorn_mode():
+            self.left_button.configure(text="◀", font=("Arial", 24, "bold"), padx=30)
+            self.right_button.configure(text="▶", font=("Arial", 24, "bold"), padx=30)
+        else:
+            self.left_button.configure(text="◀  BALRA", font=("Arial", 12, "bold"), padx=18)
+            self.right_button.configure(text="JOBBRA  ▶", font=("Arial", 12, "bold"), padx=18)
         self.left_button.pack(side="left")
-        if not self._is_helicopter_mode():
+        if not self._is_special_game_mode():
             self.horn_button.pack(side="left", padx=(8, 0))
         self.status.pack(side="left", expand=True, padx=10)
         self.right_button.pack(side="right")
-
     def _draw(self) -> None:
         if self.mode == "build":
             self._draw_workshop()
@@ -427,6 +448,9 @@ class TudasJarganyGame(tk.Tk):
     def _draw_workshop(self) -> None:
         self.canvas.delete("all")
         width, height = self.canvas.winfo_width(), self.canvas.winfo_height()
+        if self._is_unicorn_mode():
+            self._draw_unicorn_workshop()
+            return
         if self._is_helicopter_mode():
             self._draw_helicopter_workshop()
             return
@@ -484,6 +508,16 @@ class TudasJarganyGame(tk.Tk):
             fill="#26734D" if required_done == required_total else "#55738A"
         )
 
+    def _draw_unicorn_workshop(self) -> None:
+        width, height = self.canvas.winfo_width(), self.canvas.winfo_height()
+        self.canvas.create_rectangle(0, 0, width, height, fill="#F9D9F3", outline="")
+        self.canvas.create_rectangle(0, height - 125, width, height, fill="#A8E6A3", outline="")
+        center_x = width / 2
+        self._draw_rainbow(center_x - 170, 70, 340, 175)
+        self._draw_unicorn(center_x, height - 190)
+        self.canvas.create_text(center_x, 55, text="🦄  KATA  🦄", font=("Arial", 24, "bold"), fill="#8D3BA4")
+        for x in range(75, width, 125):
+            self._draw_flower(x, height - 86, "#FF6FAB" if x % 2 else "#FFD43B")
     def _draw_helicopter_workshop(self) -> None:
         """Kesz helikoptert mutat, amikor a helikopteres jatek van kivalasztva."""
         width, height = self.canvas.winfo_width(), self.canvas.winfo_height()
@@ -769,7 +803,7 @@ class TudasJarganyGame(tk.Tk):
         return f"#{red:02X}{green:02X}{blue:02X}"
 
     def _mouse_down(self, event) -> None:
-        if self.mode == "build" and self._is_helicopter_mode():
+        if self.mode == "build" and self._is_special_game_mode():
             return
         if self.mode == "drive":
             road_left, road_right = self._road_edges()
@@ -794,7 +828,7 @@ class TudasJarganyGame(tk.Tk):
                 break
 
     def _mouse_drag(self, event) -> None:
-        if self.mode == "build" and not self._is_helicopter_mode() and self.dragged:
+        if self.mode == "build" and not self._is_special_game_mode() and self.dragged:
             wanted_x = event.x - self.drag_offset[0]
             wanted_y = event.y - self.drag_offset[1]
             self.dragged.x = max(
@@ -806,7 +840,7 @@ class TudasJarganyGame(tk.Tk):
             self._draw_workshop()
 
     def _mouse_up(self, _event) -> None:
-        if self.mode != "build" or self._is_helicopter_mode() or not self.dragged:
+        if self.mode != "build" or self._is_special_game_mode() or not self.dragged:
             return
         part = self.dragged
         tx, ty = self._target(part)
@@ -877,7 +911,7 @@ class TudasJarganyGame(tk.Tk):
         self.after(280, lambda: self._auto_place_next(parts, index + 1, run))
 
     def _start_driving(self) -> None:
-        if not self._is_helicopter_mode() and not all(part.placed for part in self.parts if part.required):
+        if not self._is_special_game_mode() and not all(part.placed for part in self.parts if part.required):
             return
         self._stop_siren()
         self.mode = "drive"
@@ -889,15 +923,19 @@ class TudasJarganyGame(tk.Tk):
         self.road_items = []
         self.message, self.message_frames = "RAJT!", 45
         self.math_active = False
-        self.header_text.configure(text="Repülj csillagokat gyűjteni, és kerüld ki a felhőket!" if self._is_helicopter_mode() else "Gyűjts csillagokat, kerüld ki az akadályokat!")
+        if self._is_unicorn_mode():
+            self.header_text.configure(text="🦄  Kata unikornisa  🦄")
+        elif self._is_helicopter_mode():
+            self.header_text.configure(text="Repülj csillagokat gyűjteni, és kerüld ki a felhőket!")
+        else:
+            self.header_text.configure(text="Gyűjts csillagokat, kerüld ki az akadályokat!")
         self._show_drive_controls()
-        self._play_sound_effect("engine_start")
-        if not self._is_helicopter_mode():
+        if not self._is_special_game_mode():
+            self._play_sound_effect("engine_start")
             self.after(950, self._start_siren_loop)
         self._update_drive_status()
         self.focus_set()
         self._drive_tick()
-
     def _road_edges(self) -> tuple[float, float]:
         width = self.canvas.winfo_width()
         road_width = min(690, width - 170)
@@ -915,14 +953,19 @@ class TudasJarganyGame(tk.Tk):
                 self.message, self.message_frames = "HOPP!", 12
 
     def _update_drive_status(self) -> None:
+        if self._is_unicorn_mode():
+            self.status.configure(text=f"⭐  {self.score}", font=("Arial", 20, "bold"), fg="#C75DCE")
+            return
+        self.status.configure(font=("Arial", 12, "bold"), fg=INK)
         hearts = "♥" * self.lives + "♡" * (3 - self.lives)
         vehicle_status = "Magasság: {0}. szint".format(self.speed_level + 1) if self._is_helicopter_mode() else "Sebesség: {0}. fokozat".format(self.speed_level + 1)
-        self.status.configure(
-            text=f"★ {self.score}     |     {hearts}     |     {vehicle_status}"
-        )
-
+        self.status.configure(text=f"★ {self.score}     |     {hearts}     |     {vehicle_status}")
     def _add_stars(self, amount: int) -> bool:
         """Hozzáadja a jutalmat, és kezeli a 10 csillagos mérföldköveket."""
+        if self._is_unicorn_mode():
+            self.score += amount
+            self._update_drive_status()
+            return False
         old_score = self.score
         self.score += amount
         sped_up = False
@@ -943,7 +986,6 @@ class TudasJarganyGame(tk.Tk):
             self._play_speed_up_sound()
         self._update_drive_status()
         return sped_up
-
     def _slow_down_after_collision(self, obstacle_kind: str) -> None:
         self._play_collision_sound(obstacle_kind)
         self.speed_just_increased = False
@@ -1014,7 +1056,9 @@ class TudasJarganyGame(tk.Tk):
             winsound.PlaySound(None, 0)
         self.siren_running = False
     @staticmethod
-    def _random_road_kind(helicopter: bool = False) -> str:
+    def _random_road_kind(helicopter: bool = False, unicorn: bool = False) -> str:
+        if unicorn:
+            return "unicorn_star"
         roll = random.random()
         if helicopter:
             if roll < 0.58:
@@ -1053,10 +1097,11 @@ class TudasJarganyGame(tk.Tk):
         if self.mode != "drive" or self.math_active:
             return
         self.frame += 1
-        if self.frame % 48 == 0:
+        spawn_interval = 32 if self._is_unicorn_mode() else 48
+        if self.frame % spawn_interval == 0:
             occupied = {int(item["lane"]) for item in self.road_items if float(item["y"]) < 120}
             free_lanes = [lane for lane in range(4) if lane not in occupied] or [0, 1, 2, 3]
-            kind = self._random_road_kind(self._is_helicopter_mode())
+            kind = self._random_road_kind(self._is_helicopter_mode(), self._is_unicorn_mode())
             lane = random.choice(free_lanes)
             item: dict[str, float | int | str] = {"kind": kind, "lane": lane, "y": -45.0}
             if kind == "motorcycle":
@@ -1077,7 +1122,7 @@ class TudasJarganyGame(tk.Tk):
                 and abs(float(item.get("lane_position", item["lane"])) - self.lane) < 0.43
                 and abs(float(item["y"]) - car_y) < collision_distance
             ):
-                if item["kind"] == "star":
+                if item["kind"] in ("star", "unicorn_star"):
                     self._play_sound_effect("star_pickup")
                     sped_up = self._add_stars(1)
                     if not sped_up:
@@ -1135,6 +1180,8 @@ class TudasJarganyGame(tk.Tk):
         life_reward: bool = False,
         delay: int = 0,
     ) -> None:
+        if self._is_unicorn_mode():
+            return
         self.math_active = True
         self._stop_siren()
         self.animation_job = None
@@ -1420,6 +1467,9 @@ class TudasJarganyGame(tk.Tk):
             self._drive_tick()
 
     def _draw_road(self) -> None:
+        if self._is_unicorn_mode():
+            self._draw_unicorn_scene()
+            return
         if self._is_helicopter_mode():
             self._draw_flight_scene()
             return
@@ -1470,6 +1520,23 @@ class TudasJarganyGame(tk.Tk):
         if self.message_frames:
             self.canvas.create_text(width / 2, 60, text=self.message, font=("Arial", 22, "bold"), fill="white")
 
+    def _draw_unicorn_scene(self) -> None:
+        self.canvas.delete("all")
+        width, height = self.canvas.winfo_width(), self.canvas.winfo_height()
+        self.canvas.create_rectangle(0, 0, width, height, fill="#BEEBFF", outline="")
+        self.canvas.create_rectangle(0, height - 110, width, height, fill="#9BE29B", outline="")
+        self._draw_rainbow(width - 300, -90, 260, 220)
+        for x in range(55, width, 115):
+            self._draw_flower(x, height - 75, "#FF6FAB" if x % 3 else "#FFD43B")
+        left, right = self._road_edges()
+        lane_width = (right - left) / 4
+        for divider in (left + lane_width, left + lane_width * 2, left + lane_width * 3):
+            self.canvas.create_line(divider, 82, divider, height - 110, fill="#F6D7FF", width=5, dash=(8, 13))
+        for item in self.road_items:
+            if item["kind"] == "unicorn_star":
+                self._draw_star(self._lane_x(float(item["lane"])), float(item["y"]), 30)
+        self._draw_unicorn(self._lane_x(self.lane), height - 140)
+        self.canvas.create_text(width / 2, 45, text=f"⭐  {self.score}", font=("Arial", 26, "bold"), fill="#C75DCE")
     def _draw_flight_scene(self) -> None:
         self.canvas.delete("all")
         width, height = self.canvas.winfo_width(), self.canvas.winfo_height()
@@ -1583,6 +1650,32 @@ class TudasJarganyGame(tk.Tk):
         self.canvas.create_line(x - 26 + lean, y + 17, x + 25 + lean, y + 17, fill="#BDEBFF", width=4)
         self.canvas.create_line(x - 38, y + 46, x - 57, y + 64, fill="#F7D24C", width=3)
         self.canvas.create_line(x + 38, y + 46, x + 57, y + 64, fill="#F7D24C", width=3)
+    def _draw_rainbow(self, x: float, y: float, width: float, height: float) -> None:
+        for index, color in enumerate(("#F45B69", "#FF9F43", "#FFD43B", "#5CCF80", "#4CA6FF", "#A66CFF")):
+            inset = index * 12
+            self.canvas.create_arc(x + inset, y + inset, x + width - inset, y + height - inset, start=0, extent=180, style="arc", outline=color, width=14)
+
+    def _draw_flower(self, x: float, y: float, color: str) -> None:
+        for dx, dy in ((-10, 0), (10, 0), (0, -10), (0, 10)):
+            self.canvas.create_oval(x + dx - 8, y + dy - 8, x + dx + 8, y + dy + 8, fill=color, outline="")
+        self.canvas.create_oval(x - 7, y - 7, x + 7, y + 7, fill="#FFD43B", outline="#C88A00")
+        self.canvas.create_line(x, y + 9, x, y + 35, fill="#3E9D56", width=4)
+
+    def _draw_unicorn(self, x: float, y: float) -> None:
+        bob = math.sin(self.frame * 0.16) * 5
+        y += bob
+        self.canvas.create_line(x - 45, y + 43, x - 52, y + 76, fill="#6F4A8E", width=9)
+        self.canvas.create_line(x + 34, y + 43, x + 28, y + 76, fill="#6F4A8E", width=9)
+        self.canvas.create_line(x - 58, y + 8, x - 93, y - 12, fill="#FF78B9", width=12, smooth=True)
+        self.canvas.create_oval(x - 62, y - 32, x + 48, y + 53, fill="#FFF9FF", outline="#8D5A9F", width=3)
+        self.canvas.create_oval(x + 20, y - 70, x + 79, y - 10, fill="#FFF9FF", outline="#8D5A9F", width=3)
+        self.canvas.create_polygon(x + 44, y - 68, x + 55, y - 105, x + 65, y - 65, fill="#FFD43B", outline="#C88A00", width=2)
+        self.canvas.create_line(x + 14, y - 35, x + 49, y - 72, fill="#A66CFF", width=11, smooth=True)
+        self.canvas.create_line(x + 7, y - 27, x + 40, y - 61, fill="#FF78B9", width=8, smooth=True)
+        self.canvas.create_oval(x + 57, y - 48, x + 64, y - 41, fill="#263238", outline="")
+        self.canvas.create_arc(x + 43, y - 42, x + 62, y - 25, start=200, extent=120, style="arc", outline="#D45A8A", width=2)
+        self.canvas.create_polygon(x - 10, y - 24, x - 61, y - 58, x - 35, y + 7, fill="#E8D4FF", outline="#A66CFF", width=2)
+        self.canvas.create_oval(x - 22, y - 6, x - 5, y + 11, fill="#FFB8D6", outline="")
     def _draw_helicopter(self, x: float, y: float) -> None:
         rotor_angle = self.frame * 0.45
         rotor_length = 82
