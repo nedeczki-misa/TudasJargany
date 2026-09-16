@@ -1,15 +1,24 @@
 """A játék Tkintertől független, módosítható állapota."""
 
 from dataclasses import dataclass
-from enum import StrEnum
+from enum import Enum
 
 
-class GameMode(StrEnum):
-    """A választható játékmódok belső azonosítói."""
+class GameMode(str, Enum):
+    """A választható játékmódok Python 3.9-cel is használható azonosítói.
+
+    A ``StrEnum`` csak Python 3.11-ben jelent meg. A ``str`` és ``Enum``
+    együttes öröklése ugyanazt a szöveges összehasonlíthatóságot biztosítja
+    a játék által támogatott régebbi Python-verziókon is.
+    """
 
     CAR = "car"
     HELICOPTER = "helicopter"
     UNICORN = "unicorn"
+
+    def __str__(self) -> str:
+        """A ``StrEnum`` viselkedéséhez hasonlóan az értéket adja vissza."""
+        return self.value
 
 
 @dataclass

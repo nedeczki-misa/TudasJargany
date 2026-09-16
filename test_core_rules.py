@@ -5,6 +5,10 @@ from tudasjargany.core.state import GameMode, GameState
 
 
 class GameStateTests(unittest.TestCase):
+    def test_game_mode_is_compatible_with_plain_strings(self):
+        self.assertEqual(GameMode.CAR, "car")
+        self.assertEqual(str(GameMode.HELICOPTER), "helicopter")
+
     def test_reset_preserves_or_changes_mode(self):
         state = GameState(score=31, lives=1, speed_level=3, mode=GameMode.HELICOPTER)
         state.reset()
