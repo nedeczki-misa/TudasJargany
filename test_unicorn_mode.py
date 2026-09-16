@@ -1,19 +1,19 @@
 import unittest
 from unittest.mock import patch
 
-from main import COLORING_ANIMALS, TudasJarganyGame
+from tudasjargany.app import COLORING_ANIMALS, TudasJarganyGame
 
 
 class UnicornModeTests(unittest.TestCase):
     def test_unicorn_mode_only_spawns_collectibles(self) -> None:
-        with patch("main.random.random", return_value=0.99):
+        with patch("tudasjargany.app.random.random", return_value=0.99):
             self.assertEqual(
                 TudasJarganyGame._random_road_kind(unicorn=True),
                 "unicorn_star",
             )
 
     def test_other_modes_keep_existing_spawns(self) -> None:
-        with patch("main.random.random", return_value=0.70):
+        with patch("tudasjargany.app.random.random", return_value=0.70):
             self.assertEqual(TudasJarganyGame._random_road_kind(), "motorcycle")
             self.assertEqual(TudasJarganyGame._random_road_kind(helicopter=True), "cloud")
 
@@ -45,7 +45,7 @@ class UnicornModeTests(unittest.TestCase):
             last_coloring_animal = None
 
         picker = AnimalPicker()
-        with patch("main.random.choice", side_effect=lambda choices: choices[0]):
+        with patch("tudasjargany.app.random.choice", side_effect=lambda choices: choices[0]):
             first = TudasJarganyGame._next_coloring_animal(picker)
             second = TudasJarganyGame._next_coloring_animal(picker)
         self.assertNotEqual(first, second)
