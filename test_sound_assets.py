@@ -1,6 +1,6 @@
 import unittest
 
-from main import SOUND_FILES
+from tudasjargany.app import SOUND_FILES
 
 
 class SoundAssetTests(unittest.TestCase):

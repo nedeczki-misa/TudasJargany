@@ -46,3 +46,22 @@ python main.py
 ```
 
 Nincs szükség külső csomagra; a játék a Python beépített Tkinter felületét használja.
+
+## Fejlesztői szerkezet
+
+A `main.py` csak az alkalmazás belépési pontja. A tényleges program a
+`tudasjargany` Python-csomagban található:
+
+- `app.py`: a főablak, a képernyőváltás és az alkalmazás összeállítása;
+- `core/state.py` és `core/rules.py`: Tkinter nélküli állapot és játékszabályok;
+- `gameplay/engine.py`: a pálya képkockánkénti frissítése;
+- `workshop/controller.py`: az alkatrészek építési vezérlése;
+- `ui/workshop_view.py` és `ui/game_view.py`: a műhely és a pálya rajzolása;
+- `ui/task_dialog.py`: a tanulási feladatablak és annak időzítője;
+- `services/audio.py`: hanghatások és az offline angol beszéd szolgáltatása.
+
+Az automatikus ellenőrzések futtatása:
+
+```powershell
+python -m unittest -v
+```

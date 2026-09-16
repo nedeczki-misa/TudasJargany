@@ -1,12 +1,12 @@
 import unittest
 from unittest.mock import patch
 
-from main import TudasJarganyGame
+from tudasjargany.app import TudasJarganyGame
 
 
 class WildMotorcycleTests(unittest.TestCase):
     def test_motorcycle_is_generated_as_road_item(self) -> None:
-        with patch("main.random.random", return_value=0.70):
+        with patch("tudasjargany.app.random.random", return_value=0.70):
             self.assertEqual(TudasJarganyGame._random_road_kind(), "motorcycle")
 
     def test_motorcycle_zigzags_inside_four_lanes(self) -> None:
@@ -21,9 +21,9 @@ class WildMotorcycleTests(unittest.TestCase):
         self.assertGreater(len({round(position, 2) for position in positions}), 8)
 
     def test_car_mode_includes_roadwork_vehicles(self) -> None:
-        with patch("main.random.random", return_value=0.94):
+        with patch("tudasjargany.app.random.random", return_value=0.94):
             self.assertEqual(TudasJarganyGame._random_road_kind(), "asphalt_paver")
-        with patch("main.random.random", return_value=0.97):
+        with patch("tudasjargany.app.random.random", return_value=0.97):
             self.assertEqual(TudasJarganyGame._random_road_kind(), "dumper")
 
     def test_dumper_leaves_a_dirt_pile_in_its_lane(self) -> None:

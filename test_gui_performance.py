@@ -4,7 +4,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock
 
-from main import TudasJarganyGame
+from tudasjargany.app import TudasJarganyGame
 
 
 class GuiPerformanceTests(unittest.TestCase):
