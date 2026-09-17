@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-RESULTS_FILE = Path(__file__).with_name("eredmenyek.json")
+RESULTS_FILE = Path(__file__).resolve().parents[2] / "eredmenyek.json"
 TOP_LIMIT = 10
 
 

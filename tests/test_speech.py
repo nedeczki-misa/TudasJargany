@@ -1,7 +1,7 @@
 import base64
 import unittest
 
-from speech import EnglishSpeaker
+from tudasjargany.services.speech import EnglishSpeaker
 
 
 class EnglishSpeakerTests(unittest.TestCase):

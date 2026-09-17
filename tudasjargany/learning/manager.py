@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from learning_tasks import EnglishTaskGenerator, LearningTask
-from math_tasks import MathTaskGenerator
+from .tasks import EnglishTaskGenerator, LearningTask
+from .math_tasks import MathTaskGenerator
 
 
 class TaskManager:

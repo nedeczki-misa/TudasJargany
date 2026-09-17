@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import random
-from learning_tasks import LearningTask
+from .tasks import LearningTask
 from collections import deque
 
 

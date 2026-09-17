@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scoreboard import load_top_scores, save_result
+from tudasjargany.services.scoreboard import load_top_scores, save_result
 
 
 class ScoreboardTests(unittest.TestCase):

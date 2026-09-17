@@ -1,0 +1,1 @@
+"""A TudasJargany játékcsomag."""

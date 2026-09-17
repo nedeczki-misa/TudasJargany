@@ -1,7 +1,7 @@
 import random
 import unittest
 
-from wordsearch import WordSearch, cells_on_line
+from tudasjargany.legacy.wordsearch import WordSearch, cells_on_line
 
 
 class LineTests(unittest.TestCase):

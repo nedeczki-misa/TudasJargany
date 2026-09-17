@@ -2,7 +2,7 @@ import random
 import re
 import unittest
 
-from math_tasks import MathTaskGenerator
+from tudasjargany.learning.math_tasks import MathTaskGenerator
 
 
 class MathTaskTests(unittest.TestCase):

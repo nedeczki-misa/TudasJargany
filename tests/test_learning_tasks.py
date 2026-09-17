@@ -1,9 +1,9 @@
 import random
 import unittest
 
-from learning_tasks import EnglishTaskGenerator
-from math_tasks import MathTaskGenerator
-from task_manager import TaskManager
+from tudasjargany.learning.tasks import EnglishTaskGenerator
+from tudasjargany.learning.math_tasks import MathTaskGenerator
+from tudasjargany.learning.manager import TaskManager
 
 
 class EnglishTaskTests(unittest.TestCase):

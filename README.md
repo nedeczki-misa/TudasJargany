@@ -41,6 +41,20 @@ A játék végén írd be a neved, majd az **EREDMÉNY MENTÉSE** gombbal beker�
 
 A **KÖTELEZŐK ÖSSZERAKÁSA** gomb a még hiányzó kötelező alkatrészeket egymás után a helyükre pattintja. Az extrák – a vonóhorog, a légterelő, a rendőrségi sziréna és a taxijel – választhatók, nélkülük is el lehet indulni. Csak a ténylegesen felszerelt extrák jelennek meg vezetés közben. Az alkatrészek húzás közben sem mozgathatók ki a látható játéktérből, és kisebb ablaknál is a tálcán belül maradnak.
 
+## Projekt felépítése
+
+~~~text
+main.py                    # egyszerű indító belépési pont
+tudasjargany/
+  app.py                   # a teljes Tkinter játékfelület
+  learning/                # matek-, angol- és feladatkezelő kód
+  services/                # hang, beszéd és helyi ranglista
+  legacy/                  # a korábbi szókereső prototípus
+tests/                     # automatikus tesztek
+assets/sounds/             # a játék hangjai
+~~~
+
+A játék indítása továbbra is: **python main.py**.
 ## Indítás
 
 Windows alatt kattints duplán a `start.bat` fájlra, vagy terminálból futtasd:
