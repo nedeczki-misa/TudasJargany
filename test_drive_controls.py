@@ -12,6 +12,7 @@ class DriveControlsTests(unittest.TestCase):
             math_active=False,
             coloring_active=False,
             speed_level=0,
+            highest_speed_level=0,
             road_speed=BASE_ROAD_SPEED,
             speed_just_increased=False,
             message="",

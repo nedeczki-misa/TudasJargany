@@ -5,6 +5,8 @@ from __future__ import annotations
 import math
 import random
 import threading
+import time
+from datetime import datetime
 from pathlib import Path
 import tkinter as tk
 from dataclasses import dataclass
@@ -17,6 +19,7 @@ except ImportError:  # Nem Windows rendszeren a Tk csengője lesz a tartalék.
 from learning_tasks import LearningTask
 from task_manager import TaskManager
 from speech import EnglishSpeaker
+from scoreboard import load_top_scores, save_result
 
 
 BG = "#EAF7FF"
@@ -116,6 +119,13 @@ class TudasJarganyGame(tk.Tk):
         self.frame = 0
         self.score = 0
         self.lives = 3
+        self.game_started_at: float | None = None
+        self.tasks_shown = 0
+        self.tasks_correct = 0
+        self.tasks_wrong = 0
+        self.tasks_timed_out = 0
+        self.highest_speed_level = 0
+        self.result_saved = False
         self.speed_level = 0
         self.road_speed = BASE_ROAD_SPEED
         self.drive_paused = False
@@ -1000,6 +1010,10 @@ class TudasJarganyGame(tk.Tk):
         self._stop_siren()
         self.mode = "drive"
         self.lane, self.frame, self.score, self.lives = 1, 0, 0, 3
+        self.game_started_at = time.monotonic()
+        self.tasks_shown = self.tasks_correct = self.tasks_wrong = self.tasks_timed_out = 0
+        self.highest_speed_level = 0
+        self.result_saved = False
         self.speed_level, self.road_speed = 0, BASE_ROAD_SPEED
         self.drive_paused = False
         self.speed_just_increased = False
@@ -1074,6 +1088,7 @@ class TudasJarganyGame(tk.Tk):
         if self.speed_level == old_level:
             return "break"
         self.road_speed = 0 if self.speed_level < 0 else BASE_ROAD_SPEED + self.speed_level * SPEED_STEP
+        self.highest_speed_level = max(self.highest_speed_level, self.speed_level)
         self.speed_just_increased = False
         if self.road_speed == 0:
             self.message, self.message_frames = "MEGÁLLTÁL! ↑ VAGY W AZ INDULÁSHOZ", 999999
@@ -1132,6 +1147,7 @@ class TudasJarganyGame(tk.Tk):
                 self.pending_bonus_challenges += 1
                 self.message = f"{milestone} PONT! SEBESSÉGVÁLTÁS!"
             self.speed_level += 1
+            self.highest_speed_level = max(self.highest_speed_level, self.speed_level)
             self.road_speed = BASE_ROAD_SPEED + self.speed_level * SPEED_STEP
             self.message_frames = 45
             sped_up = True
@@ -1604,6 +1620,7 @@ class TudasJarganyGame(tk.Tk):
         task = self.task_manager.next_task()
         self.current_task = task
         self.current_math_task = task
+        self.tasks_shown += 1
         task_title = f"{self.challenge_title} - {task.subject}"
         popup = tk.Toplevel(self)
         self.math_popup = popup
@@ -1708,6 +1725,7 @@ class TudasJarganyGame(tk.Tk):
         if self.task_resolved:
             return
         if choice == task.answer:
+            self.tasks_correct += 1
             self.task_resolved = True
             self._cancel_math_timer()
             for button in buttons:
@@ -1732,6 +1750,7 @@ class TudasJarganyGame(tk.Tk):
             self._play_sound_effect("bonus_success")
             self.after(1000, lambda: self._finish_learning_task(popup, success=True))
         else:
+            self.tasks_wrong += 1
             clicked.configure(bg="#E55245")
             if self.challenge_is_collision:
                 self._lose_life()
@@ -1791,6 +1810,7 @@ class TudasJarganyGame(tk.Tk):
 
         self.task_resolved = True
         self.task_timer_job = None
+        self.tasks_timed_out += 1
         for button in buttons:
             button.configure(state="disabled")
         if self.challenge_is_collision:
@@ -2161,6 +2181,74 @@ class TudasJarganyGame(tk.Tk):
         self.canvas.create_rectangle(x + 58, y + 30, x + 73, y + 49, fill="#5D4037", outline="")
         self.canvas.create_text(x, y, text="LEZÁRVA", font=("Arial", 10, "bold"), fill="#17212B")
 
+    def _game_duration_seconds(self) -> int:
+        if self.game_started_at is None:
+            return 0
+        return max(0, int(time.monotonic() - self.game_started_at))
+
+    def _game_stats(self) -> dict[str, int]:
+        return {
+            "duration_seconds": self._game_duration_seconds(),
+            "tasks_shown": self.tasks_shown,
+            "tasks_correct": self.tasks_correct,
+            "tasks_wrong": self.tasks_wrong,
+            "tasks_timed_out": self.tasks_timed_out,
+            "lives": self.lives,
+            "top_speed": max(0, self.highest_speed_level + 1),
+        }
+
+    @staticmethod
+    def _format_duration(seconds: int) -> str:
+        minutes, seconds = divmod(seconds, 60)
+        return f"{minutes}:{seconds:02}"
+
+    def _game_stats_text(self) -> str:
+        stats = self._game_stats()
+        return (
+            f"Játékidő: {self._format_duration(stats['duration_seconds'])}    Életek: {stats['lives']}\n"
+            f"Feladatok: {stats['tasks_shown']}    Helyes: {stats['tasks_correct']}    "
+            f"Hibás: {stats['tasks_wrong']}    Lejárt: {stats['tasks_timed_out']}\n"
+            f"Legnagyobb sebesség: {stats['top_speed']}. fokozat"
+        )
+
+    @staticmethod
+    def _leaderboard_text(scores: list[dict]) -> str:
+        if not scores:
+            return "TOP 10\nMég nincs elmentett eredmény."
+        lines = ["TOP 10"]
+        for place, result in enumerate(scores, start=1):
+            lines.append(
+                f"{place}. {result['name']} — {result['stars']} ★  ({result['when']})"
+            )
+        return "\n".join(lines)
+
+    def _save_game_result(
+        self,
+        name_entry: tk.Entry,
+        save_button: tk.Button,
+        feedback: tk.Label,
+        leaderboard: tk.Label,
+    ) -> None:
+        if self.result_saved:
+            return
+        result = {
+            "name": name_entry.get(),
+            "stars": self.score,
+            "when": datetime.now().strftime("%Y.%m.%d. %H:%M"),
+            "mode": self.game_mode.get(),
+            "stats": self._game_stats(),
+        }
+        try:
+            scores = save_result(result)
+        except OSError:
+            feedback.configure(text="Most nem sikerült elmenteni. Próbáld újra!", fg="#D14B3E")
+            return
+        self.result_saved = True
+        name_entry.configure(state="disabled")
+        save_button.configure(state="disabled", text="ELMENTVE! ✓")
+        feedback.configure(text="Szuper! Az eredményed bekerült a ranglistába.", fg="#238636")
+        leaderboard.configure(text=self._leaderboard_text(scores))
+
     def _game_over(self) -> None:
         if self.mode != "drive":
             return
@@ -2168,7 +2256,7 @@ class TudasJarganyGame(tk.Tk):
         self.mode = "stopped"
         popup = tk.Toplevel(self)
         popup.title("Menet vége")
-        popup.geometry("440x285")
+        popup.geometry("620x650")
         popup.resizable(False, False)
         popup.configure(bg="#FFF5CC")
         popup.transient(self)
@@ -2177,17 +2265,58 @@ class TudasJarganyGame(tk.Tk):
         x = self.winfo_x() + (self.winfo_width() - popup.winfo_width()) // 2
         y = self.winfo_y() + (self.winfo_height() - popup.winfo_height()) // 2
         popup.geometry(f"+{x}+{y}")
-        tk.Label(popup, text="SZÉP VEZETÉS!", font=("Arial", 24, "bold"), bg="#FFF5CC", fg="#1565C0").pack(pady=(28, 8))
-        tk.Label(popup, text=f"Összegyűjtöttél {self.score} csillagot! ★", font=("Arial", 15, "bold"), bg="#FFF5CC", fg=INK).pack(pady=8)
+
+        tk.Label(
+            popup, text="SZÉP VEZETÉS!", font=("Arial", 24, "bold"),
+            bg="#FFF5CC", fg="#1565C0",
+        ).pack(pady=(20, 6))
+        tk.Label(
+            popup, text=f"Összegyűjtöttél {self.score} csillagot! ★",
+            font=("Arial", 16, "bold"), bg="#FFF5CC", fg=INK,
+        ).pack(pady=4)
+        tk.Label(
+            popup, text=self._game_stats_text(), font=("Arial", 10, "bold"),
+            bg="#FFF5CC", fg="#526D7A", justify="center",
+        ).pack(pady=(4, 12))
+
+        name_row = tk.Frame(popup, bg="#FFF5CC")
+        name_row.pack()
+        tk.Label(
+            name_row, text="NEVED:", font=("Arial", 12, "bold"),
+            bg="#FFF5CC", fg=INK,
+        ).pack(side="left", padx=(0, 8))
+        name_entry = tk.Entry(name_row, font=("Arial", 14, "bold"), width=18, justify="center")
+        name_entry.pack(side="left")
+        name_entry.focus_set()
+
+        feedback = tk.Label(popup, text="Írd be a neved, majd mentsd el!", font=("Arial", 10, "bold"), bg="#FFF5CC", fg="#526D7A")
+        feedback.pack(pady=(6, 2))
+        leaderboard = tk.Label(
+            popup, text=self._leaderboard_text(load_top_scores()),
+            font=("Arial", 10, "bold"), bg="#FFFDF1", fg=INK,
+            justify="left", anchor="w", width=56, height=11, padx=12, pady=7,
+            relief="solid", borderwidth=2,
+        )
+        leaderboard.pack(padx=24, pady=4)
+
+        save_button = tk.Button(
+            popup, text="EREDMÉNY MENTÉSE", font=("Arial", 11, "bold"),
+            bg="#1565C0", fg="white", relief="flat", padx=16, pady=7, cursor="hand2",
+        )
+        save_button.configure(
+            command=lambda: self._save_game_result(name_entry, save_button, feedback, leaderboard)
+        )
+        save_button.pack(pady=(5, 3))
+        name_entry.bind("<Return>", lambda _event: self._save_game_result(name_entry, save_button, feedback, leaderboard))
+
         tk.Button(
             popup, text="VEZETEK MÉG!", command=lambda: (popup.destroy(), self._start_driving()),
-            font=("Arial", 12, "bold"), bg=BRICK_GREEN, fg="white", relief="flat", padx=20, pady=9, cursor="hand2"
-        ).pack(pady=6)
+            font=("Arial", 12, "bold"), bg=BRICK_GREEN, fg="white", relief="flat", padx=20, pady=8, cursor="hand2",
+        ).pack(pady=3)
         tk.Button(
             popup, text="VISSZA A MŰHELYBE", command=lambda: (popup.destroy(), self._reset_build()),
-            font=("Arial", 10, "bold"), bg="#E1F0F8", fg=INK, relief="flat", padx=18, pady=7, cursor="hand2"
-        ).pack(pady=3)
-
+            font=("Arial", 10, "bold"), bg="#E1F0F8", fg=INK, relief="flat", padx=18, pady=6, cursor="hand2",
+        ).pack(pady=2)
 
 if __name__ == "__main__":
     TudasJarganyGame().mainloop()

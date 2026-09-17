@@ -37,6 +37,8 @@ Vezetni a képernyő alján lévő **BALRA** és **JOBBRA** gombbal, az út megf
 
 A **Space** gomb szüneteltet. A fel nyíl vagy **W** gyorsít, a le nyíl vagy **S** lassít. A 0. sebességnél minden megáll.
 
+A játék végén írd be a neved, majd az **EREDMÉNY MENTÉSE** gombbal bekerülhetsz a helyi TOP 10 listába. A lista megőrzi, ki mikor hány csillagot szerzett, valamint az adott játék rövid statisztikáit. Az eredmények csak ezen a gépen, az **eredmenyek.json** fájlban maradnak.
+
 A **KÖTELEZŐK ÖSSZERAKÁSA** gomb a még hiányzó kötelező alkatrészeket egymás után a helyükre pattintja. Az extrák – a vonóhorog, a légterelő, a rendőrségi sziréna és a taxijel – választhatók, nélkülük is el lehet indulni. Csak a ténylegesen felszerelt extrák jelennek meg vezetés közben. Az alkatrészek húzás közben sem mozgathatók ki a látható játéktérből, és kisebb ablaknál is a tálcán belül maradnak.
 
 ## Indítás
