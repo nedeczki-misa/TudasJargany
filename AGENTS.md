@@ -43,20 +43,24 @@ Az agent munkarendje:
 - Tesztek: `python -m unittest -v`.
 - A magyar szövegeket és fájlokat UTF-8 kódolással kell megőrizni.
 
-## Fájlok
+## Fájlok és projektfelépítés
 
-- `main.py`: a teljes felület, az autóépítés, a vezetés, az akadályok, a pontozás és a feladatablakok.
-- `math_tasks.py`: összeadásos és kivonásos feladatok generátora.
-- `learning_tasks.py`: közös `LearningTask` feladatmodell és angol szókincsgenerátor.
-- `task_manager.py`: a műhelyben kiválasztott tantárgyak sorrendjét és váltását kezeli.
-- `speech.py`: Windows `System.Speech` alapú, offline angol kiejtés egér-ráhúzásra.
-- `test_learning_tasks.py`: angol és többtantárgyas feladatok automatikus tesztjei.
-- `test_math_tasks.py`: a feladatgenerátor automatikus tesztjei.
-- `README.md`: játékosi használati útmutató.
-- `start.bat`: egyszerű Windows-indító.
-- `assets/sounds/`: a játék eredeti WAV hangcsomagja és annak leírása.
-- `wordsearch.py` és `test_wordsearch.py`: a projekt korábbi szókeresős prototípusának megmaradt fájljai; a jelenlegi autós játék nem használja őket.
+- main.py: rövid indító belépési pont; a python main.py parancs marad a játék indítása.
+- tudasjargany/app.py: a teljes Tkinter játékfelület, az autóépítés, a vezetés, a pontozás és a feladatablakok.
+- tudasjargany/learning/: tanulási modulok:
+  - tasks.py: közös LearningTask modell és angol feladatok;
+  - math_tasks.py: összeadásos és kivonásos feladatok;
+  - manager.py: a tantárgyak sorrendje és váltása.
+- tudasjargany/services/:
+  - speech.py: offline angol kiejtés;
+  - scoreboard.py: helyi TOP 10 ranglista és eredménymentés.
+- tudasjargany/legacy/wordsearch.py: a megmaradt szókeresős prototípus.
+- tests/: minden automatikus teszt, a forrásmappáktól elkülönítve.
+- assets/sounds/: a játék eredeti WAV hangcsomagja.
+- README.md: játékosi használati útmutató és mappatérkép.
+- start.bat: egyszerű Windows-indító.
 
+Új modulokat a felelősségüknek megfelelő csomagba tegyél. A felhasználói felülethez tartozó kód az app.py-ban maradjon; tananyag a learning, külső működések és fájlmentés a services mappába kerüljön. Új teszt a tests/ mappába kerüljön.
 ## Autóépítés
 
 ### Kötelező elemek
@@ -142,12 +146,12 @@ class LearningTask:
 
 A jelenlegi modulok:
 
-- `math_tasks.py`: 30-as számkörbeli összeadás és kivonás;
-- `learning_tasks.py`: angol–magyar alap szókincs;
-- `speech.py`: az angol szavak fölé vitt egérhez tartozó offline kiejtés;
-- `task_manager.py`: alapból Matek, Angol bekapcsolásakor `MATEK → ANGOL` váltás.
+- `tudasjargany/learning/math_tasks.py`: 30-as számkörbeli összeadás és kivonás;
+- `tudasjargany/learning/tasks.py`: angol–magyar alap szókincs;
+- `tudasjargany/services/speech.py`: az angol szavak fölé vitt egérhez tartozó offline kiejtés;
+- `tudasjargany/learning/manager.py`: alapból Matek, Angol bekapcsolásakor `MATEK → ANGOL` váltás.
 
-Új tantárgy hozzáadásakor készíts egy `next_task()` metódusú generátort, amely `LearningTask` objektumot ad vissza, majd regisztráld a `TaskManager` tantárgysorrendjében. Így később a magyar nyelvtan, irodalom vagy szövegértés a feladatablak átírása nélkül bővíthető.
+Új tantárgy hozzáadásakor készíts egy `next_task()` metódusú generátort, amely `LearningTask` objektumot ad vissza, majd regisztráld a tudasjargany/learning/manager.py TaskManager tantárgysorrendjében. Így később a magyar nyelvtan, irodalom vagy szövegértés a feladatablak átírása nélkül bővíthető.
 
 ## Lehetséges 2. osztályos feladattípusok – a konkrét tananyagot pedagógussal érdemes ellenőrizni:
 
