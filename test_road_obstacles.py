@@ -32,6 +32,13 @@ class WildMotorcycleTests(unittest.TestCase):
         self.assertEqual(dirt_pile["lane"], 3)
         self.assertLess(float(dirt_pile["y"]), -45.0)
 
+    def test_dumper_occupies_two_neighboring_lanes(self) -> None:
+        dumper = {"kind": "dumper", "lane": 1, "lane_span": 2, "lane_position": 1.5, "y": 0.0}
+        self.assertEqual(TudasJarganyGame._road_item_lanes(dumper), (1, 2))
+        self.assertFalse(TudasJarganyGame._road_item_hits_lane(dumper, 0))
+        self.assertTrue(TudasJarganyGame._road_item_hits_lane(dumper, 1))
+        self.assertTrue(TudasJarganyGame._road_item_hits_lane(dumper, 2))
+        self.assertFalse(TudasJarganyGame._road_item_hits_lane(dumper, 3))
 
 if __name__ == "__main__":
     unittest.main()

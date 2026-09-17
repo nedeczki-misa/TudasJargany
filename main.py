@@ -1183,6 +1183,20 @@ class TudasJarganyGame(tk.Tk):
     def _dumper_dirt_pile(lane: int) -> dict[str, float | int | str]:
         """A dömper után egy földkupac marad ugyanabban a sávban."""
         return {"kind": "dirt_pile", "lane": lane, "y": -150.0}
+
+    @staticmethod
+    def _road_item_lanes(item: dict[str, float | int | str]) -> tuple[int, ...]:
+        """Megadja az akadály által elfoglalt sávokat."""
+        first_lane = int(item["lane"])
+        lane_span = int(item.get("lane_span", 1))
+        return tuple(range(first_lane, min(4, first_lane + lane_span)))
+
+    @staticmethod
+    def _road_item_hits_lane(item: dict[str, float | int | str], lane: int) -> bool:
+        if int(item.get("lane_span", 1)) > 1:
+            return lane in TudasJarganyGame._road_item_lanes(item)
+        return abs(float(item.get("lane_position", item["lane"])) - lane) < 0.43
+
     @staticmethod
     def _move_wild_motorcycle(item: dict[str, float | int | str]) -> None:
         """A motoros sávok közt cikázik, de nem hagyhatja el az utat."""
@@ -1205,14 +1219,26 @@ class TudasJarganyGame(tk.Tk):
         self.frame += 1
         spawn_interval = 32 if self._is_unicorn_mode() else 48
         if self.frame % spawn_interval == 0:
-            occupied = {int(item["lane"]) for item in self.road_items if float(item["y"]) < 120}
+            occupied = {
+                lane
+                for item in self.road_items
+                if float(item["y"]) < 120
+                for lane in self._road_item_lanes(item)
+            }
             free_lanes = [lane for lane in range(4) if lane not in occupied] or [0, 1, 2, 3]
             kind = self._random_road_kind(self._is_helicopter_mode(), self._is_unicorn_mode())
-            lane = random.choice(free_lanes)
+            if kind == "dumper":
+                free_pairs = [lane for lane in range(3) if lane not in occupied and lane + 1 not in occupied]
+                lane = random.choice(free_pairs or [0, 1, 2])
+            else:
+                lane = random.choice(free_lanes)
             item: dict[str, float | int | str] = {"kind": kind, "lane": lane, "y": -45.0}
             if kind == "motorcycle":
                 item["lane_position"] = float(lane)
                 item["lane_direction"] = random.choice((-1.0, 1.0))
+            elif kind == "dumper":
+                item["lane_span"] = 2
+                item["lane_position"] = lane + 0.5
             self.road_items.append(item)
             if kind == "dumper":
                 self.road_items.append(self._dumper_dirt_pile(lane))
@@ -1228,7 +1254,7 @@ class TudasJarganyGame(tk.Tk):
             collision_distance = 72 if item["kind"] in ("closure", "asphalt_paver", "dumper") else 54
             if (
                 hit_obstacle is None
-                and abs(float(item.get("lane_position", item["lane"])) - self.lane) < 0.43
+                and self._road_item_hits_lane(item, self.lane)
                 and abs(float(item["y"]) - car_y) < collision_distance
             ):
                 if item["kind"] in ("star", "unicorn_star"):
@@ -2039,13 +2065,20 @@ class TudasJarganyGame(tk.Tk):
         self.canvas.create_text(x, y + 10, text="ASZFALT", font=("Arial", 8, "bold"), fill="#3E2B00")
 
     def _draw_dumper(self, x: float, y: float) -> None:
-        """Narancssárga dömper földdel megrakva."""
-        self.canvas.create_rectangle(x - 48, y - 58, x + 48, y + 56, fill="#F57C00", outline="#6D3A00", width=3)
-        self.canvas.create_polygon(x - 40, y - 47, x + 40, y - 47, x + 29, y - 4, x - 29, y - 4, fill="#8D5A3B", outline="#5D4037", width=2)
-        self.canvas.create_rectangle(x - 32, y + 4, x + 32, y + 41, fill="#BDEBFF", outline="#315C6A", width=2)
-        for wheel_x in (-35, 35):
-            self.canvas.create_oval(x + wheel_x - 12, y + 38, x + wheel_x + 12, y + 62, fill="#20262A", outline="#101418")
-        self.canvas.create_text(x, y + 23, text="DÖMPER", font=("Arial", 8, "bold"), fill="#4B2630")
+        """Keresztben álló, két szomszédos sávot elfoglaló dömper."""
+        self.canvas.create_rectangle(x - 112, y - 40, x + 54, y + 39, fill="#F57C00", outline="#6D3A00", width=3)
+        self.canvas.create_polygon(
+            x - 105, y - 34, x + 38, y - 34, x + 20, y + 10, x - 88, y + 10,
+            fill="#8D5A3B", outline="#5D4037", width=2,
+        )
+        self.canvas.create_rectangle(x + 54, y - 29, x + 111, y + 39, fill="#FF9800", outline="#6D3A00", width=3)
+        self.canvas.create_rectangle(x + 65, y - 20, x + 101, y + 8, fill="#BDEBFF", outline="#315C6A", width=2)
+        for wheel_x in (-75, 15, 80):
+            self.canvas.create_oval(
+                x + wheel_x - 15, y + 25, x + wheel_x + 15, y + 55,
+                fill="#20262A", outline="#101418", width=2,
+            )
+        self.canvas.create_text(x - 28, y + 24, text="DÖMPER", font=("Arial", 9, "bold"), fill="#FFF3D6")
 
     def _draw_dirt_pile(self, x: float, y: float) -> None:
         self.canvas.create_oval(x - 52, y - 8, x + 52, y + 34, fill="#8D5A3B", outline="#5D4037", width=3)
