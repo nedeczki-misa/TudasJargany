@@ -33,7 +33,9 @@ Angolfeladatnál húzd az egeret az angol szó fölé: a játék offline kimondj
 - Ütközési feladatnál a hibás válasz vagy az idő lejárta egy életet elvesz, a helyes válasz viszont nem kerül életbe és nem ad csillagot.
 - A 10 csillagos bónuszfeladat helyes válasza továbbra is 2 csillagot ér; időtúllépéskor a bónusz elvész.
 
-Vezetni a képernyő alján lévő **BALRA** és **JOBBRA** gombbal, az út megfelelő sávjára kattintva, illetve a bal és jobb nyílbillentyűvel lehet.
+Vezetni a képernyő alján lévő **BALRA** és **JOBBRA** gombbal, az út megfelelő sávjára kattintva, illetve a bal és jobb nyílbillentyűvel vagy az **A** és **D** gombokkal lehet.
+
+A **Space** gomb szüneteltet. A fel nyíl vagy **W** gyorsít, a le nyíl vagy **S** lassít. A 0. sebességnél minden megáll.
 
 A **KÖTELEZŐK ÖSSZERAKÁSA** gomb a még hiányzó kötelező alkatrészeket egymás után a helyükre pattintja. Az extrák – a vonóhorog, a légterelő, a rendőrségi sziréna és a taxijel – választhatók, nélkülük is el lehet indulni. Csak a ténylegesen felszerelt extrák jelennek meg vezetés közben. Az alkatrészek húzás közben sem mozgathatók ki a látható játéktérből, és kisebb ablaknál is a tálcán belül maradnak.
 

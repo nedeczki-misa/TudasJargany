@@ -118,6 +118,7 @@ class TudasJarganyGame(tk.Tk):
         self.lives = 3
         self.speed_level = 0
         self.road_speed = BASE_ROAD_SPEED
+        self.drive_paused = False
         self.pending_bonus_challenges = 0
         self.pending_life_challenges = 0
         self.pending_coloring_challenges = 0
@@ -259,6 +260,15 @@ class TudasJarganyGame(tk.Tk):
         self.bind("<Right>", lambda _event: self._change_lane(1))
         self.bind("<a>", lambda _event: self._change_lane(-1))
         self.bind("<d>", lambda _event: self._change_lane(1))
+        self.bind("<space>", self._toggle_drive_pause)
+        self.bind("<Up>", self._increase_drive_speed)
+        self.bind("<Down>", self._decrease_drive_speed)
+        self.bind("<w>", self._increase_drive_speed)
+        self.bind("<s>", self._decrease_drive_speed)
+        self.bind("<A>", lambda _event: self._change_lane(-1))
+        self.bind("<D>", lambda _event: self._change_lane(1))
+        self.bind("<W>", self._increase_drive_speed)
+        self.bind("<S>", self._decrease_drive_speed)
 
     def _window_resized(self, event=None) -> None:
         """A feliratokat es gombokat az aktualis ablakszelesseghez igazitja."""
@@ -348,6 +358,7 @@ class TudasJarganyGame(tk.Tk):
             self.after_cancel(self.animation_job)
             self.animation_job = None
         self.mode = "build"
+        self.drive_paused = False
         self._cancel_math_timer()
         self.assembly_run += 1
         self.auto_assembling = False
@@ -990,6 +1001,7 @@ class TudasJarganyGame(tk.Tk):
         self.mode = "drive"
         self.lane, self.frame, self.score, self.lives = 1, 0, 0, 3
         self.speed_level, self.road_speed = 0, BASE_ROAD_SPEED
+        self.drive_paused = False
         self.speed_just_increased = False
         self.last_drive_status = None
         self.pending_bonus_challenges = 0
@@ -1027,6 +1039,53 @@ class TudasJarganyGame(tk.Tk):
             self.lane = max(0, min(3, self.lane + direction))
             if old_lane != self.lane:
                 self.message, self.message_frames = "HOPP!", 12
+
+    def _toggle_drive_pause(self, _event=None) -> str:
+        """A Space gombbal megállítja vagy folytatja a vezetést."""
+        if self.mode != "drive" or self.math_active or self.coloring_active:
+            return "break"
+        self.drive_paused = not self.drive_paused
+        if self.drive_paused:
+            if self.animation_job:
+                try:
+                    self.after_cancel(self.animation_job)
+                except tk.TclError:
+                    pass
+                self.animation_job = None
+            self.message, self.message_frames = "SZÜNET – SPACE A FOLYTATÁSHOZ", 999999
+            self._draw_road()
+        else:
+            self.message, self.message_frames = "MEHET!", 24
+            self._drive_tick()
+        return "break"
+
+    def _increase_drive_speed(self, _event=None) -> str:
+        return self._change_drive_speed(1)
+
+    def _decrease_drive_speed(self, _event=None) -> str:
+        return self._change_drive_speed(-1)
+
+    def _change_drive_speed(self, change: int) -> str:
+        """Kézzel állítja a sebességet; a -1. szint a teljes megállás."""
+        if self.mode != "drive" or self.math_active or self.coloring_active:
+            return "break"
+        old_level = self.speed_level
+        self.speed_level = max(-1, self.speed_level + change)
+        if self.speed_level == old_level:
+            return "break"
+        self.road_speed = 0 if self.speed_level < 0 else BASE_ROAD_SPEED + self.speed_level * SPEED_STEP
+        self.speed_just_increased = False
+        if self.road_speed == 0:
+            self.message, self.message_frames = "MEGÁLLTÁL! ↑ VAGY W AZ INDULÁSHOZ", 999999
+        elif change > 0:
+            self.message, self.message_frames = "GYORSÍTÁS!", 24
+            self._play_speed_up_sound()
+        else:
+            self.message, self.message_frames = "LASSÍTÁS!", 24
+        self.last_drive_status = None
+        self._update_drive_status()
+        self._draw_road()
+        return "break"
 
     def _update_drive_status(self) -> None:
         if self._is_unicorn_mode():
@@ -1214,7 +1273,10 @@ class TudasJarganyGame(tk.Tk):
         item["lane"] = int(round(lane_position))
 
     def _drive_tick(self) -> None:
-        if self.mode != "drive" or self.math_active or self.coloring_active:
+        if self.mode != "drive" or self.math_active or self.coloring_active or self.drive_paused:
+            return
+        if self.road_speed <= 0:
+            self.animation_job = self.after(80, self._drive_tick)
             return
         self.frame += 1
         spawn_interval = 32 if self._is_unicorn_mode() else 48
