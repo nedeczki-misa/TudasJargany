@@ -41,6 +41,14 @@ class UnicornModeTests(unittest.TestCase):
         self.assertEqual(game.score, 10)
         self.assertEqual(game.pending_coloring_challenges, 1)
 
+    def test_every_coloring_animal_can_be_drawn(self) -> None:
+        class CanvasStub:
+            def __getattr__(self, _name: str):
+                return lambda *_args, **_kwargs: None
+
+        canvas = CanvasStub()
+        for animal in COLORING_ANIMALS:
+            TudasJarganyGame._draw_coloring_animal(None, canvas, animal, 310, 180)
     def test_twenty_coloring_animals_do_not_repeat_immediately(self) -> None:
         self.assertEqual(len(COLORING_ANIMALS), 20)
         self.assertEqual(len(set(COLORING_ANIMALS)), 20)

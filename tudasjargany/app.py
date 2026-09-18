@@ -1493,6 +1493,78 @@ class TudasJarganyGame(tk.Tk):
             canvas.create_oval(face_x - 34 * scale, face_y + 12 * scale, face_x - 20 * scale, face_y + 22 * scale, fill="#FFB6CF", outline="")
             canvas.create_oval(face_x + 20 * scale, face_y + 12 * scale, face_x + 34 * scale, face_y + 22 * scale, fill="#FFB6CF", outline="")
 
+        def animal_details() -> None:
+            """Az egyedi jegyek teszik az állatokat első pillantásra felismerhetővé."""
+            if animal == "pillango":
+                for dot_x, dot_y in ((-70, -44), (-75, 45), (70, -44), (75, 45)):
+                    canvas.create_oval(x + dot_x - 10, y + dot_y - 10, x + dot_x + 10, y + dot_y + 10, fill="#FFD43B", outline=edge, width=2)
+            elif animal == "hal":
+                for scale_x in (-20, 8, 34):
+                    canvas.create_arc(x + scale_x, y - 12, x + scale_x + 28, y + 18, start=210, extent=220, style="arc", outline="#4CA6FF", width=2)
+            elif animal == "teknos":
+                for shell_x, shell_y in ((-52, -9), (-15, -15), (20, -9), (-34, 25), (2, 25)):
+                    canvas.create_polygon(x + shell_x, y + shell_y, x + shell_x + 17, y + shell_y - 10, x + shell_x + 34, y + shell_y, x + shell_x + 28, y + shell_y + 18, x + shell_x + 6, y + shell_y + 18, fill="#A8E6A3", outline="#4B8B52", width=2)
+            elif animal == "pingvin":
+                canvas.create_arc(x - 55, y - 18, x - 4, y + 60, start=290, extent=120, style="arc", outline="#263238", width=7)
+                canvas.create_arc(x + 4, y - 18, x + 55, y + 60, start=130, extent=120, style="arc", outline="#263238", width=7)
+            elif animal == "bagoly":
+                canvas.create_line(x - 34, y - 101, x - 4, y - 111, fill="#8D5A9F", width=5)
+                canvas.create_line(x + 4, y - 111, x + 34, y - 101, fill="#8D5A9F", width=5)
+            elif animal == "madar":
+                canvas.create_arc(x - 37, y - 12, x + 37, y + 65, start=195, extent=150, style="arc", outline="#65AEEA", width=4)
+            elif animal == "beka":
+                canvas.create_arc(x - 37, y - 37, x + 37, y + 12, start=200, extent=140, style="arc", outline="#2F8F4B", width=4)
+                canvas.create_oval(x - 10, y - 39, x - 3, y - 32, fill="#FFFFFF", outline="")
+                canvas.create_oval(x + 3, y - 39, x + 10, y - 32, fill="#FFFFFF", outline="")
+            elif animal == "cica":
+                for whisker_y in (-42, -30, -18):
+                    canvas.create_line(x + 35, y + whisker_y, x - 2, y + whisker_y - 8, fill="#6F4A8E", width=2)
+                    canvas.create_line(x + 93, y + whisker_y, x + 128, y + whisker_y - 8, fill="#6F4A8E", width=2)
+            elif animal == "kutya":
+                canvas.create_oval(x + 18, y - 92, x + 51, y - 28, fill="#C98C5B", outline=edge, width=3)
+                canvas.create_oval(x + 77, y - 88, x + 110, y - 28, fill="#C98C5B", outline=edge, width=3)
+                canvas.create_line(x - 98, y + 10, x - 135, y - 12, x - 147, y + 15, fill="#C98C5B", width=8, smooth=True)
+            elif animal == "nyuszi":
+                canvas.create_line(x + 45, y - 77, x + 40, y - 151, fill="#FFB6CF", width=7)
+                canvas.create_line(x + 82, y - 78, x + 93, y - 151, fill="#FFB6CF", width=7)
+            elif animal == "medve":
+                canvas.create_oval(x + 22, y - 94, x + 55, y - 64, fill="#B98258", outline=edge, width=3)
+                canvas.create_oval(x + 70, y - 94, x + 103, y - 64, fill="#B98258", outline=edge, width=3)
+            elif animal == "majom":
+                canvas.create_oval(x + 20, y - 95, x + 57, y - 60, fill="#C98C5B", outline=edge, width=3)
+                canvas.create_oval(x + 68, y - 95, x + 105, y - 60, fill="#C98C5B", outline=edge, width=3)
+                canvas.create_arc(x - 123, y - 38, x - 62, y + 50, start=65, extent=260, style="arc", outline="#8D5A3B", width=8)
+            elif animal == "elefant":
+                canvas.create_oval(x - 4, y - 74, x + 49, y - 10, fill="#B9D7E7", outline=edge, width=3)
+                canvas.create_oval(x + 73, y - 25, x + 96, y + 78, fill="#B9D7E7", outline=edge, width=3)
+                canvas.create_line(x + 85, y + 62, x + 100, y + 76, fill="#6F4A8E", width=3)
+            elif animal == "zsiraf":
+                for spot_x, spot_y in ((-48, 12), (-12, 47), (24, 8), (54, -47)):
+                    canvas.create_oval(x + spot_x, y + spot_y, x + spot_x + 22, y + spot_y + 18, fill="#F6B84A", outline="#B78316", width=2)
+                canvas.create_oval(x + 46, y - 151, x + 64, y - 135, fill="#F6B84A", outline=edge, width=2)
+                canvas.create_oval(x + 77, y - 151, x + 95, y - 135, fill="#F6B84A", outline=edge, width=2)
+            elif animal == "zebra":
+                for stripe_x in range(-72, 37, 23):
+                    canvas.create_line(x + stripe_x, y - 15, x + stripe_x + 26, y + 70, fill="#263238", width=5)
+            elif animal == "lo":
+                for mane_y in range(-64, -8, 13):
+                    canvas.create_line(x + 29, y + mane_y, x + 8, y + mane_y + 14, fill="#7A4A2E", width=5)
+            elif animal == "tehen":
+                for spot_x, spot_y in ((-52, 4), (-8, 39), (32, 8)):
+                    canvas.create_oval(x + spot_x, y + spot_y, x + spot_x + 26, y + spot_y + 23, fill="#263238", outline="")
+                canvas.create_line(x + 28, y - 84, x + 18, y - 105, fill="#D9B470", width=5)
+                canvas.create_line(x + 98, y - 84, x + 108, y - 105, fill="#D9B470", width=5)
+            elif animal == "malac":
+                canvas.create_oval(x + 48, y - 48, x + 91, y - 16, fill="#FFB6CF", outline=edge, width=3)
+                canvas.create_oval(x + 58, y - 37, x + 64, y - 30, fill="#8D5A9F", outline="")
+                canvas.create_oval(x + 76, y - 37, x + 82, y - 30, fill="#8D5A9F", outline="")
+            elif animal == "oroszlan":
+                canvas.create_oval(x + 5, y - 108, x + 125, y + 18, fill="#F6B84A", outline="#B78316", width=8)
+                cartoon_face(x + 64, y - 48, 0.70)
+            elif animal == "roka":
+                canvas.create_polygon(x + 25, y - 70, x + 32, y - 132, x + 62, y - 82, fill="#F57C4C", outline=edge, width=3)
+                canvas.create_polygon(x + 70, y - 82, x + 98, y - 132, x + 104, y - 70, fill="#F57C4C", outline=edge, width=3)
+                canvas.create_line(x - 86, y + 7, x - 145, y - 26, x - 158, y + 14, fill="#F57C4C", width=14, smooth=True)
         if animal == "pillango":
             oval(x - 120, y - 80, x - 8, y + 10, tags[0])
             oval(x - 110, y + 5, x - 8, y + 105, tags[1])
@@ -1502,6 +1574,7 @@ class TudasJarganyGame(tk.Tk):
             canvas.create_line(x - 6, y - 55, x - 38, y - 82, fill=edge, width=3)
             canvas.create_line(x + 6, y - 55, x + 38, y - 82, fill=edge, width=3)
             cartoon_face(x, y - 41, 0.52)
+            animal_details()
             return
         if animal == "hal":
             oval(x - 110, y - 48, x + 58, y + 62, tags[0])
@@ -1511,6 +1584,7 @@ class TudasJarganyGame(tk.Tk):
             oval(x - 82, y - 5, x - 45, y + 30, tags[4])
             canvas.create_oval(x - 72, y - 2, x - 61, y + 9, fill="#263238", outline="")
             cartoon_face(x - 66, y + 13, 0.48)
+            animal_details()
             return
         if animal == "teknos":
             oval(x - 110, y - 50, x + 82, y + 78, tags[0])
@@ -1520,6 +1594,7 @@ class TudasJarganyGame(tk.Tk):
             polygon((x - 90, y - 5, x - 152, y - 45, x - 137, y + 42), tags[4])
             canvas.create_arc(x - 70, y - 20, x + 50, y + 55, start=10, extent=310, style="arc", outline=edge, width=3)
             cartoon_face(x + 94, y + 6, 0.48)
+            animal_details()
             return
         if animal in ("madar", "pingvin", "bagoly"):
             oval(x - 65, y - 55, x + 65, y + 105, tags[0])
@@ -1534,6 +1609,7 @@ class TudasJarganyGame(tk.Tk):
                 canvas.create_oval(x + 4, y - 88, x + 35, y - 56, fill="white", outline=edge, width=2)
 
             cartoon_face(x, y - 75, 0.60)
+            animal_details()
             return
         if animal == "beka":
             oval(x - 110, y - 10, x + 110, y + 90, tags[0])
@@ -1544,6 +1620,7 @@ class TudasJarganyGame(tk.Tk):
             canvas.create_oval(x - 52, y - 60, x - 36, y - 43, fill="#263238", outline="")
             canvas.create_oval(x + 36, y - 60, x + 52, y - 43, fill="#263238", outline="")
             cartoon_face(x, y - 53, 0.55)
+            animal_details()
             return
         oval(x - 105, y - 25, x + 48, y + 85, tags[0])
         oval(x + 18, y - 92, x + 110, y - 4, tags[1])
@@ -1584,6 +1661,7 @@ class TudasJarganyGame(tk.Tk):
             canvas.create_oval(x - 3, y - 112, x + 130, y + 22, fill="", outline=edge, width=11)
         elif animal == "roka":
             canvas.create_polygon(x + 62, y - 36, x + 89, y - 10, x + 64, y + 10, fill="white", outline=edge, width=2)
+        animal_details()
     @staticmethod
     def _draw_coloring_rainbow(canvas: tk.Canvas, x: float, y: float, width: float, height: float) -> None:
         for index, color in enumerate(("#F45B69", "#FF9F43", "#FFD43B", "#5CCF80", "#4CA6FF", "#A66CFF")):
