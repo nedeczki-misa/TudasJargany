@@ -71,6 +71,13 @@ COLORING_ANIMALS = (
     "lo", "tehen", "malac", "roka", "pingvin", "teknos", "hal", "madar",
     "pillango", "bagoly", "majom", "beka",
 )
+COLORING_ANIMAL_NAMES = {
+    "cica": "Cica", "kutya": "Kutya", "nyuszi": "Nyuszi", "medve": "Medve",
+    "oroszlan": "Oroszlán", "elefant": "Elefánt", "zsiraf": "Zsiráf", "zebra": "Zebra",
+    "lo": "Ló", "tehen": "Tehén", "malac": "Malac", "roka": "Róka",
+    "pingvin": "Pingvin", "teknos": "Teknős", "hal": "Hal", "madar": "Madár",
+    "pillango": "Pillangó", "bagoly": "Bagoly", "majom": "Majom", "beka": "Béka",
+}
 COLORING_PAINT_TAGS = tuple(f"paint-{index}" for index in range(5))
 
 @dataclass
@@ -1421,7 +1428,6 @@ class TudasJarganyGame(tk.Tk):
             return
         popup = tk.Toplevel(self)
         self.coloring_popup = popup
-        popup.title("🎨")
         popup.resizable(False, False)
         popup.configure(bg="#F9D9F3")
         popup.transient(self)
@@ -1431,6 +1437,7 @@ class TudasJarganyGame(tk.Tk):
         canvas.create_rectangle(0, 330, 620, 450, fill="#A8E6A3", outline="")
         self._draw_coloring_rainbow(canvas, 350, 18, 210, 155)
         animal = self._next_coloring_animal()
+        popup.title(f"🎨 Színezd ki: {COLORING_ANIMAL_NAMES[animal]}!")
         self._draw_coloring_animal(canvas, animal, 310, 180)
         colors = ("#FF6FAB", "#FF9F43", "#FFD43B", "#58C97B", "#4CA6FF", "#A66CFF")
         selected = {"color": colors[0]}

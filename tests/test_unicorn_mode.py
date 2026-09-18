@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from main import COLORING_ANIMALS, TudasJarganyGame
+from main import COLORING_ANIMALS, COLORING_ANIMAL_NAMES, TudasJarganyGame
 
 
 class UnicornModeTests(unittest.TestCase):
@@ -44,6 +44,8 @@ class UnicornModeTests(unittest.TestCase):
     def test_twenty_coloring_animals_do_not_repeat_immediately(self) -> None:
         self.assertEqual(len(COLORING_ANIMALS), 20)
         self.assertEqual(len(set(COLORING_ANIMALS)), 20)
+        self.assertEqual(set(COLORING_ANIMAL_NAMES), set(COLORING_ANIMALS))
+        self.assertEqual(COLORING_ANIMAL_NAMES["nyuszi"], "Nyuszi")
 
         class AnimalPicker:
             last_coloring_animal = None
