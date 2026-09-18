@@ -2058,21 +2058,39 @@ class TudasJarganyGame(tk.Tk):
         self.canvas.create_rectangle(x - 34, y + 27, x + 34, y + 37, fill="#FF6D00", outline="#8D3B00", width=2)
 
     def _draw_wild_motorcycle(self, x: float, y: float, direction: float) -> None:
-        """Szines, enyhen megdolgoztatott motor es sisakos motoros felulnezetben."""
-        lean = 11 if direction > 0 else -11
-        self.canvas.create_line(x - lean, y - 39, x + lean, y + 44, fill="#20262A", width=10)
-        self.canvas.create_oval(x - lean - 12, y - 49, x - lean + 12, y - 25, fill="#1B2026", outline="#101418", width=2)
-        self.canvas.create_oval(x + lean - 12, y + 29, x + lean + 12, y + 53, fill="#1B2026", outline="#101418", width=2)
+        """Felülnézetes versenymotor sisakos vezetővel."""
+        lean = 10 if direction > 0 else -10
+        front_x = x - lean
+        rear_x = x + lean
+
+        # A két széles versenygumi és a motor váza.
+        self.canvas.create_oval(front_x - 14, y - 58, front_x + 14, y - 25, fill="#151A1E", outline="#05080A", width=2)
+        self.canvas.create_oval(rear_x - 16, y + 29, rear_x + 16, y + 63, fill="#151A1E", outline="#05080A", width=2)
+        self.canvas.create_line(front_x, y - 35, rear_x, y + 43, fill="#B0BEC5", width=8)
+
+        # Áramvonalas piros idom, szélvédő és első lámpák.
         self.canvas.create_polygon(
-            x - 14 + lean, y - 20, x + 15 + lean, y - 10,
-            x + 12 + lean, y + 27, x - 12 + lean, y + 30,
-            fill="#E53935", outline="#6D1515", width=2,
+            front_x - 18, y - 31, front_x + 18, y - 31,
+            x + 23, y - 5, rear_x + 20, y + 33,
+            rear_x - 20, y + 33, x - 23, y - 5,
+            fill="#E53935", outline="#751A1A", width=3,
         )
-        self.canvas.create_oval(x - 16 - lean / 3, y - 18, x + 16 - lean / 3, y + 12, fill="#263238", outline="#111820", width=2)
-        self.canvas.create_oval(x - 10 - lean / 3, y - 29, x + 10 - lean / 3, y - 9, fill="#FFCE45", outline="#7E5A00", width=2)
-        self.canvas.create_line(x - 26 + lean, y + 17, x + 25 + lean, y + 17, fill="#BDEBFF", width=4)
-        self.canvas.create_line(x - 38, y + 46, x - 57, y + 64, fill="#F7D24C", width=3)
-        self.canvas.create_line(x + 38, y + 46, x + 57, y + 64, fill="#F7D24C", width=3)
+        self.canvas.create_polygon(
+            front_x - 13, y - 28, front_x + 13, y - 28,
+            x + 12, y - 13, x - 12, y - 13,
+            fill="#BDEBFF", outline="#315C6A", width=2,
+        )
+        self.canvas.create_oval(front_x - 13, y - 22, front_x - 3, y - 12, fill="#FFF3A3", outline="")
+        self.canvas.create_oval(front_x + 3, y - 22, front_x + 13, y - 12, fill="#FFF3A3", outline="")
+
+        # A motoros teste, kezei a kormányon, és a fényes bukósisakja.
+        self.canvas.create_oval(x - 17, y - 5, x + 17, y + 29, fill="#263238", outline="#101820", width=2)
+        self.canvas.create_line(x - 17, y + 3, x - 31, y - 12, fill="#263238", width=7)
+        self.canvas.create_line(x + 17, y + 3, x + 31, y - 12, fill="#263238", width=7)
+        self.canvas.create_line(x - 35, y - 13, x + 35, y - 13, fill="#C7DDE7", width=4)
+        self.canvas.create_oval(x - 16, y - 31, x + 16, y + 1, fill="#FFD23F", outline="#6D5100", width=2)
+        self.canvas.create_arc(x - 13, y - 26, x + 13, y - 5, start=195, extent=150, style="arc", outline="#234A73", width=5)
+        self.canvas.create_line(rear_x - 12, y + 44, rear_x + 12, y + 44, fill="#FF5252", width=5)
     def _draw_rainbow(self, x: float, y: float, width: float, height: float) -> None:
         for index, color in enumerate(("#F45B69", "#FF9F43", "#FFD43B", "#5CCF80", "#4CA6FF", "#A66CFF")):
             inset = index * 12
