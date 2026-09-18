@@ -5,13 +5,17 @@ from main import COLORING_ANIMALS, TudasJarganyGame
 
 
 class UnicornModeTests(unittest.TestCase):
-    def test_unicorn_mode_only_spawns_collectibles(self) -> None:
-        with patch("main.random.random", return_value=0.99):
+    def test_unicorn_mode_spawns_stars_and_dragons(self) -> None:
+        with patch("main.random.random", return_value=0.40):
             self.assertEqual(
                 TudasJarganyGame._random_road_kind(unicorn=True),
                 "unicorn_star",
             )
-
+        with patch("main.random.random", return_value=0.99):
+            self.assertEqual(
+                TudasJarganyGame._random_road_kind(unicorn=True),
+                "unicorn_dragon",
+            )
     def test_other_modes_keep_existing_spawns(self) -> None:
         with patch("main.random.random", return_value=0.70):
             self.assertEqual(TudasJarganyGame._random_road_kind(), "motorcycle")

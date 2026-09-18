@@ -1228,9 +1228,9 @@ class TudasJarganyGame(tk.Tk):
         self.siren_running = False
     @staticmethod
     def _random_road_kind(helicopter: bool = False, unicorn: bool = False) -> str:
-        if unicorn:
-            return "unicorn_star"
         roll = random.random()
+        if unicorn:
+            return "unicorn_star" if roll < 0.72 else "unicorn_dragon"
         if helicopter:
             if roll < 0.58:
                 return "star"
@@ -1358,6 +1358,8 @@ class TudasJarganyGame(tk.Tk):
                     else:
                         # A gyorsulási üzenetet itt rögtön megjelenítjük.
                         self.speed_just_increased = False
+                elif item["kind"] == "unicorn_dragon":
+                    self.message, self.message_frames = "🐉 KERÜLD KI A SÁRKÁNYT!", 35
                 else:
                     hit_obstacle = str(item["kind"])
                     self._slow_down_after_collision(hit_obstacle)
@@ -1954,8 +1956,11 @@ class TudasJarganyGame(tk.Tk):
         for divider in (left + lane_width, left + lane_width * 2, left + lane_width * 3):
             self.canvas.create_line(divider, 82, divider, height - 110, fill="#F6D7FF", width=5, dash=(8, 13))
         for item in self.road_items:
+            x, y = self._lane_x(float(item["lane"])), float(item["y"])
             if item["kind"] == "unicorn_star":
-                self._draw_star(self._lane_x(float(item["lane"])), float(item["y"]), 30)
+                self._draw_star(x, y, 30)
+            elif item["kind"] == "unicorn_dragon":
+                self._draw_unicorn_dragon(x, y)
         self._draw_unicorn(self._lane_x(self.lane), height - 140)
         self.canvas.create_text(width / 2, 45, text=f"⭐  {self.score}", font=("Arial", 26, "bold"), fill="#C75DCE")
     def _draw_flight_scene(self) -> None:
@@ -2102,6 +2107,20 @@ class TudasJarganyGame(tk.Tk):
         self.canvas.create_oval(x - 7, y - 7, x + 7, y + 7, fill="#FFD43B", outline="#C88A00")
         self.canvas.create_line(x, y + 9, x, y + 35, fill="#3E9D56", width=4)
 
+    def _draw_unicorn_dragon(self, x: float, y: float) -> None:
+        """Kedves, felülnézetes sárkány Kata pályájára."""
+        wing_flap = math.sin(self.frame * 0.25) * 8
+        self.canvas.create_polygon(x - 18, y + 6, x - 72, y - 24 - wing_flap, x - 48, y + 34, fill="#B59AE8", outline="#6E52A3", width=2)
+        self.canvas.create_polygon(x + 18, y + 6, x + 72, y - 24 + wing_flap, x + 48, y + 34, fill="#B59AE8", outline="#6E52A3", width=2)
+        self.canvas.create_oval(x - 31, y - 35, x + 31, y + 47, fill="#65C96A", outline="#287D42", width=3)
+        self.canvas.create_oval(x - 25, y - 66, x + 25, y - 18, fill="#7ADD7F", outline="#287D42", width=3)
+        self.canvas.create_polygon(x - 17, y - 58, x - 24, y - 83, x - 4, y - 67, fill="#F4D35E", outline="#B88319", width=2)
+        self.canvas.create_polygon(x + 17, y - 58, x + 24, y - 83, x + 4, y - 67, fill="#F4D35E", outline="#B88319", width=2)
+        self.canvas.create_oval(x - 15, y - 51, x - 7, y - 43, fill="#263238", outline="")
+        self.canvas.create_oval(x + 7, y - 51, x + 15, y - 43, fill="#263238", outline="")
+        self.canvas.create_arc(x - 12, y - 43, x + 12, y - 25, start=205, extent=130, style="arc", outline="#B33D68", width=2)
+        self.canvas.create_line(x - 16, y + 39, x - 47, y + 70, x - 26, y + 56, x - 5, y + 78, fill="#65C96A", width=10, smooth=True)
+        self.canvas.create_oval(x - 20, y - 5, x + 20, y + 29, fill="#A7E4A9", outline="")
     def _draw_unicorn(self, x: float, y: float) -> None:
         bob = math.sin(self.frame * 0.16) * 5
         y += bob

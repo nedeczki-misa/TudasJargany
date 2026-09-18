@@ -98,7 +98,7 @@ Az extrák nélkül is el lehet indulni. Vezetés közben csak a ténylegesen fe
 - Gyűjthető elem: csillag.
 - Akadályok: bója, másik személyautó, busz, négyszeres hosszúságú kamion, cikázó vadmotoros és sávlezárás.
 - Helikopteres módban a kész helikopterrel kell a négy légi sávban csillagokat gyűjteni, felhőket és madarakat kikerülni; a tanulási, élet- és gyorsulási szabályok közösek az autós móddal.
-- Kata unikornisos módja 4 éves gyermeknek készült: csak csillagok jönnek, nincsenek akadályok, életek, gyorsulás vagy feladatablakok. Az irányítás nagy bal és jobb nyílgombokkal, billentyűzettel vagy közvetlen sávkattintással működik.
+- Kata unikornisos módja 4 éves gyermeknek készült: csillagok és kedves sárkányok jönnek. A sárkányt ki kell kerülni, de nincs életvesztés, gyorsulás vagy feladatablak. Az irányítás nagy bal és jobb nyílgombokkal, billentyűzettel vagy közvetlen sávkattintással működik.
 - A játékos három élettel indul.
 - Minden 10. csillagnál egy sebességfokozattal gyorsul az autó, amit rövid, emelkedő hangsor jelez.
 - Minden 10. csillag után bónuszfeladat jelenik meg.
