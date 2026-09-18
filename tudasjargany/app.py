@@ -1474,6 +1474,17 @@ class TudasJarganyGame(tk.Tk):
 
         def polygon(points: tuple[float, ...], tag: str) -> None:
             canvas.create_polygon(points, fill=white, outline=edge, width=4, tags=tag)
+        def cartoon_face(face_x: float, face_y: float, scale: float = 1.0) -> None:
+            """Nagy, kedves arc, hogy az állat messziről is felismerhető legyen."""
+            eye_w, eye_h = 14 * scale, 18 * scale
+            for eye_x in (face_x - 15 * scale, face_x + 15 * scale):
+                canvas.create_oval(eye_x - eye_w, face_y - eye_h, eye_x + eye_w, face_y + eye_h, fill="#FFFFFF", outline=edge, width=2)
+                canvas.create_oval(eye_x - 4 * scale, face_y - 3 * scale, eye_x + 5 * scale, face_y + 8 * scale, fill="#263238", outline="")
+                canvas.create_oval(eye_x - 2 * scale, face_y - 2 * scale, eye_x + 1 * scale, face_y + 1 * scale, fill="#FFFFFF", outline="")
+            canvas.create_oval(face_x - 6 * scale, face_y + 12 * scale, face_x + 6 * scale, face_y + 20 * scale, fill="#FF9EBC", outline=edge, width=1)
+            canvas.create_arc(face_x - 13 * scale, face_y + 12 * scale, face_x + 13 * scale, face_y + 30 * scale, start=205, extent=130, style="arc", outline="#B33D68", width=2)
+            canvas.create_oval(face_x - 34 * scale, face_y + 12 * scale, face_x - 20 * scale, face_y + 22 * scale, fill="#FFB6CF", outline="")
+            canvas.create_oval(face_x + 20 * scale, face_y + 12 * scale, face_x + 34 * scale, face_y + 22 * scale, fill="#FFB6CF", outline="")
 
         if animal == "pillango":
             oval(x - 120, y - 80, x - 8, y + 10, tags[0])
@@ -1483,6 +1494,7 @@ class TudasJarganyGame(tk.Tk):
             oval(x - 14, y - 55, x + 14, y + 103, tags[4])
             canvas.create_line(x - 6, y - 55, x - 38, y - 82, fill=edge, width=3)
             canvas.create_line(x + 6, y - 55, x + 38, y - 82, fill=edge, width=3)
+            cartoon_face(x, y - 41, 0.52)
             return
         if animal == "hal":
             oval(x - 110, y - 48, x + 58, y + 62, tags[0])
@@ -1491,6 +1503,7 @@ class TudasJarganyGame(tk.Tk):
             polygon((x - 30, y + 45, x + 5, y + 105, x + 30, y + 40), tags[3])
             oval(x - 82, y - 5, x - 45, y + 30, tags[4])
             canvas.create_oval(x - 72, y - 2, x - 61, y + 9, fill="#263238", outline="")
+            cartoon_face(x - 66, y + 13, 0.48)
             return
         if animal == "teknos":
             oval(x - 110, y - 50, x + 82, y + 78, tags[0])
@@ -1499,6 +1512,7 @@ class TudasJarganyGame(tk.Tk):
             oval(x + 25, y + 55, x + 77, y + 105, tags[3])
             polygon((x - 90, y - 5, x - 152, y - 45, x - 137, y + 42), tags[4])
             canvas.create_arc(x - 70, y - 20, x + 50, y + 55, start=10, extent=310, style="arc", outline=edge, width=3)
+            cartoon_face(x + 94, y + 6, 0.48)
             return
         if animal in ("madar", "pingvin", "bagoly"):
             oval(x - 65, y - 55, x + 65, y + 105, tags[0])
@@ -1511,6 +1525,8 @@ class TudasJarganyGame(tk.Tk):
             if animal == "bagoly":
                 canvas.create_oval(x - 35, y - 88, x - 4, y - 56, fill="white", outline=edge, width=2)
                 canvas.create_oval(x + 4, y - 88, x + 35, y - 56, fill="white", outline=edge, width=2)
+
+            cartoon_face(x, y - 75, 0.60)
             return
         if animal == "beka":
             oval(x - 110, y - 10, x + 110, y + 90, tags[0])
@@ -1520,6 +1536,7 @@ class TudasJarganyGame(tk.Tk):
             polygon((x + 95, y + 42, x + 160, y + 95, x + 90, y + 92), tags[4])
             canvas.create_oval(x - 52, y - 60, x - 36, y - 43, fill="#263238", outline="")
             canvas.create_oval(x + 36, y - 60, x + 52, y - 43, fill="#263238", outline="")
+            cartoon_face(x, y - 53, 0.55)
             return
         oval(x - 105, y - 25, x + 48, y + 85, tags[0])
         oval(x + 18, y - 92, x + 110, y - 4, tags[1])
@@ -1528,7 +1545,7 @@ class TudasJarganyGame(tk.Tk):
         polygon((x - 83, y + 5, x - 155, y - 32, x - 127, y + 52), tags[4])
         canvas.create_line(x - 70, y + 78, x - 74, y + 120, fill=edge, width=10)
         canvas.create_line(x + 18, y + 78, x + 23, y + 120, fill=edge, width=10)
-        canvas.create_oval(x + 80, y - 60, x + 91, y - 49, fill="#263238", outline="")
+        cartoon_face(x + 64, y - 48, 0.70)
         if animal == "nyuszi":
             canvas.create_line(x + 45, y - 75, x + 40, y - 150, fill=edge, width=18)
             canvas.create_line(x + 82, y - 76, x + 93, y - 150, fill=edge, width=18)
@@ -2122,20 +2139,40 @@ class TudasJarganyGame(tk.Tk):
         self.canvas.create_line(x - 16, y + 39, x - 47, y + 70, x - 26, y + 56, x - 5, y + 78, fill="#65C96A", width=10, smooth=True)
         self.canvas.create_oval(x - 20, y - 5, x + 20, y + 29, fill="#A7E4A9", outline="")
     def _draw_unicorn(self, x: float, y: float) -> None:
+        """Nagy szemű, színes sörényű mesebeli unikornis."""
         bob = math.sin(self.frame * 0.16) * 5
         y += bob
-        self.canvas.create_line(x - 45, y + 43, x - 52, y + 76, fill="#6F4A8E", width=9)
-        self.canvas.create_line(x + 34, y + 43, x + 28, y + 76, fill="#6F4A8E", width=9)
-        self.canvas.create_line(x - 58, y + 8, x - 93, y - 12, fill="#FF78B9", width=12, smooth=True)
-        self.canvas.create_oval(x - 62, y - 32, x + 48, y + 53, fill="#FFF9FF", outline="#8D5A9F", width=3)
-        self.canvas.create_oval(x + 20, y - 70, x + 79, y - 10, fill="#FFF9FF", outline="#8D5A9F", width=3)
-        self.canvas.create_polygon(x + 44, y - 68, x + 55, y - 105, x + 65, y - 65, fill="#FFD43B", outline="#C88A00", width=2)
-        self.canvas.create_line(x + 14, y - 35, x + 49, y - 72, fill="#A66CFF", width=11, smooth=True)
-        self.canvas.create_line(x + 7, y - 27, x + 40, y - 61, fill="#FF78B9", width=8, smooth=True)
-        self.canvas.create_oval(x + 57, y - 48, x + 64, y - 41, fill="#263238", outline="")
-        self.canvas.create_arc(x + 43, y - 42, x + 62, y - 25, start=200, extent=120, style="arc", outline="#D45A8A", width=2)
-        self.canvas.create_polygon(x - 10, y - 24, x - 61, y - 58, x - 35, y + 7, fill="#E8D4FF", outline="#A66CFF", width=2)
-        self.canvas.create_oval(x - 22, y - 6, x - 5, y + 11, fill="#FFB8D6", outline="")
+        # Csillogó, réteges farok a test mögött.
+        for offset, color in ((0, "#FF76B7"), (6, "#A66CFF"), (12, "#65C9F4")):
+            self.canvas.create_line(x - 49, y + 5 + offset, x - 98, y - 19 + offset, x - 115, y + 19 + offset, fill=color, width=10, smooth=True)
+        # Lábak és paták.
+        for leg_x in (-39, 24):
+            self.canvas.create_line(x + leg_x, y + 37, x + leg_x - 4, y + 76, fill="#FFF9FF", width=15)
+            self.canvas.create_oval(x + leg_x - 13, y + 66, x + leg_x + 7, y + 81, fill="#FFB8D6", outline="#8D5A9F", width=2)
+        # Puha, gömbölyű test és szárny.
+        self.canvas.create_oval(x - 67, y - 38, x + 51, y + 55, fill="#FFF9FF", outline="#8D5A9F", width=4)
+        self.canvas.create_oval(x - 44, y - 16, x + 30, y + 42, fill="#FFEAF5", outline="")
+        self.canvas.create_polygon(x - 7, y - 24, x - 59, y - 66, x - 38, y + 12, fill="#E7D6FF", outline="#A66CFF", width=3)
+        self.canvas.create_line(x - 15, y - 24, x - 46, y - 51, fill="#FFFFFF", width=4, smooth=True)
+        # Fej, fülek és csíkos varázsszarv.
+        self.canvas.create_oval(x + 18, y - 84, x + 84, y - 13, fill="#FFF9FF", outline="#8D5A9F", width=4)
+        self.canvas.create_polygon(x + 31, y - 72, x + 39, y - 99, x + 51, y - 75, fill="#FFB8D6", outline="#8D5A9F", width=2)
+        self.canvas.create_polygon(x + 62, y - 76, x + 72, y - 101, x + 80, y - 68, fill="#FFB8D6", outline="#8D5A9F", width=2)
+        self.canvas.create_polygon(x + 47, y - 79, x + 57, y - 125, x + 68, y - 77, fill="#FFD43B", outline="#B78316", width=2)
+        for horn_y in (-113, -101, -89):
+            self.canvas.create_line(x + 52, y + horn_y, x + 65, y + horn_y + 8, fill="#FF8CC8", width=3)
+        # Szivárvány-sörény.
+        self.canvas.create_line(x + 23, y - 65, x + 7, y - 37, x + 22, y - 13, fill="#A66CFF", width=10, smooth=True)
+        self.canvas.create_line(x + 32, y - 76, x + 13, y - 46, x + 29, y - 16, fill="#FF76B7", width=8, smooth=True)
+        self.canvas.create_line(x + 39, y - 79, x + 23, y - 49, x + 37, y - 20, fill="#65C9F4", width=6, smooth=True)
+        # Nagy csillogó szem, pofi és mosoly.
+        self.canvas.create_oval(x + 55, y - 59, x + 74, y - 36, fill="#FFFFFF", outline="#5A3767", width=2)
+        self.canvas.create_oval(x + 62, y - 53, x + 72, y - 39, fill="#263238", outline="")
+        self.canvas.create_oval(x + 64, y - 51, x + 67, y - 47, fill="#FFFFFF", outline="")
+        self.canvas.create_line(x + 54, y - 57, x + 58, y - 63, fill="#5A3767", width=2)
+        self.canvas.create_line(x + 58, y - 57, x + 62, y - 63, fill="#5A3767", width=2)
+        self.canvas.create_oval(x + 38, y - 36, x + 51, y - 26, fill="#FFB6CF", outline="")
+        self.canvas.create_arc(x + 52, y - 35, x + 72, y - 20, start=205, extent=125, style="arc", outline="#C85A85", width=2)
     def _draw_helicopter(self, x: float, y: float) -> None:
         rotor_angle = self.frame * 0.45
         rotor_length = 82
