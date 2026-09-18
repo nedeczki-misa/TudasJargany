@@ -1249,11 +1249,22 @@ class TudasJarganyGame(tk.Tk):
             return "car"
         if roll < 0.93:
             return "bus"
-        if roll < 0.96:
+        if roll < 0.95:
             return "asphalt_paver"
-        if roll < 0.98:
+        if roll < 0.97:
+            return "truck"
+        if roll < 0.99:
             return "dumper"
         return "closure"
+
+    @staticmethod
+    def _collision_distance(item: dict[str, float | int | str]) -> float:
+        """Az akadály magasságához illő ütközési távolság."""
+        if item["kind"] == "truck":
+            return 280.0
+        if item["kind"] in ("closure", "asphalt_paver", "dumper"):
+            return 72.0
+        return 54.0
 
     @staticmethod
     def _dumper_dirt_pile(lane: int) -> dict[str, float | int | str]:
@@ -1311,8 +1322,11 @@ class TudasJarganyGame(tk.Tk):
                 lane = random.choice(free_pairs or [0, 1, 2])
             else:
                 lane = random.choice(free_lanes)
-            item: dict[str, float | int | str] = {"kind": kind, "lane": lane, "y": -45.0}
-            if kind == "motorcycle":
+            item_y = -250.0 if kind == "truck" else -45.0
+            item: dict[str, float | int | str] = {"kind": kind, "lane": lane, "y": item_y}
+            if kind == "truck":
+                item["vehicle_length"] = 440.0
+            elif kind == "motorcycle":
                 item["lane_position"] = float(lane)
                 item["lane_direction"] = random.choice((-1.0, 1.0))
             elif kind == "dumper":
@@ -1330,7 +1344,7 @@ class TudasJarganyGame(tk.Tk):
             item["y"] = float(item["y"]) + self.road_speed
             if item["kind"] == "motorcycle":
                 self._move_wild_motorcycle(item)
-            collision_distance = 72 if item["kind"] in ("closure", "asphalt_paver", "dumper") else 54
+            collision_distance = self._collision_distance(item)
             if (
                 hit_obstacle is None
                 and self._road_item_hits_lane(item, self.lane)
@@ -1348,7 +1362,8 @@ class TudasJarganyGame(tk.Tk):
                     hit_obstacle = str(item["kind"])
                     self._slow_down_after_collision(hit_obstacle)
                 continue
-            if float(item["y"]) < height + 60:
+            half_length = float(item.get("vehicle_length", 0.0)) / 2
+            if float(item["y"]) < height + 60 + half_length:
                 survivors.append(item)
         self.road_items = survivors
         if self.message_frames:
@@ -1364,6 +1379,7 @@ class TudasJarganyGame(tk.Tk):
                 "car": "Összekoccantál egy másik autóval.",
                 "motorcycle": "Egy vadmotoros eléd cikázott!",
                 "bus": "Túl közel kerültél a buszhoz.",
+                "truck": "Egy hosszú kamion elállta az utat!",
                 "asphalt_paver": "Az aszfaltozó gép elállta az utat!",
                 "dumper": "A dömper útjába kerültél!",
                 "dirt_pile": "A földkupacba hajtottál!",
@@ -1911,6 +1927,8 @@ class TudasJarganyGame(tk.Tk):
                 self._draw_wild_motorcycle(x, y, float(item.get("lane_direction", 1.0)))
             elif kind == "bus":
                 self._draw_bus(x, y)
+            elif kind == "truck":
+                self._draw_truck(x, y)
             elif kind == "asphalt_paver":
                 self._draw_asphalt_paver(x, y)
             elif kind == "dumper":
@@ -2137,6 +2155,21 @@ class TudasJarganyGame(tk.Tk):
         self.canvas.create_rectangle(x - 32, y + 54, x - 13, y + 66, fill="#E53935", outline="")
         self.canvas.create_rectangle(x + 13, y + 54, x + 32, y + 66, fill="#E53935", outline="")
         self.canvas.create_text(x, y - 35, text="BUSZ", font=("Arial", 10, "bold"), fill=INK)
+
+    def _draw_truck(self, x: float, y: float) -> None:
+        """Négy személyautónyi hosszú, egy sávban haladó kamion."""
+        self.canvas.create_rectangle(x - 46, y - 220, x + 46, y + 120, fill="#1976D2", outline="#0D3F74", width=3)
+        self.canvas.create_rectangle(x - 36, y - 200, x + 36, y + 92, fill="#42A5F5", outline="#0D3F74", width=2)
+        for cargo_y in (-168, -96, -24, 48):
+            self.canvas.create_rectangle(x - 31, y + cargo_y, x + 31, y + cargo_y + 43, fill="#90CAF9", outline="#1565C0", width=2)
+        self.canvas.create_rectangle(x - 46, y + 120, x + 46, y + 220, fill="#F57C00", outline="#713800", width=3)
+        self.canvas.create_rectangle(x - 32, y + 133, x + 32, y + 168, fill="#BDEBFF", outline="#315C6A", width=2)
+        self.canvas.create_text(x, y + 188, text="KAMION", font=("Arial", 9, "bold"), fill="#542600")
+        for wheel_y in (-176, -84, 8, 100, 168, 211):
+            self.canvas.create_oval(x - 55, y + wheel_y - 12, x - 37, y + wheel_y + 12, fill="#20262A", outline="#101418")
+            self.canvas.create_oval(x + 37, y + wheel_y - 12, x + 55, y + wheel_y + 12, fill="#20262A", outline="#101418")
+        self.canvas.create_rectangle(x - 33, y + 202, x - 13, y + 215, fill="#E53935", outline="")
+        self.canvas.create_rectangle(x + 13, y + 202, x + 33, y + 215, fill="#E53935", outline="")
 
     def _draw_asphalt_paver(self, x: float, y: float) -> None:
         """Sárga aszfaltozó gép, amely elfoglal egy teljes sávot."""

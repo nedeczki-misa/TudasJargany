@@ -25,7 +25,7 @@ Angolfeladatnál húzd az egeret az angol szó fölé: a játék offline kimondj
 - A pálya gyorsulását az `assets/sounds/speed_up.wav` hang jelzi.
 - Minden 30. pontnál külön, 30 másodperces tanulási feladat jelenik meg. Helyes válasszal egy élet tölthető vissza, legfeljebb háromig; ezen a mérföldkőn a szokásos +2 csillagos bónusz nem jár.
 - Ütközéskor fékhang, majd bójánál könnyű, más járműnél vagy sávlezárásnál erősebb ütközési hang hallható.
-- A bóják, más autók és buszok mellett vadmotorosok is megjelennek; a motorosok cikázva sávot váltanak.
+- A bóják, más autók és buszok mellett négyszeres hosszúságú kamionok és vadmotorosok is megjelennek; a motorosok cikázva sávot váltanak.
 - Helikopteres módban az égi sávokban gyűjts csillagokat, és kerüld ki a viharfelhőket meg a madarakat. Az ütközés ugyanúgy tanulási feladatot indít.
 - Induláskor motorhang szól; vezetés közben a **DUDÁLJ** gomb a kürtöt használja. Felszerelt rendőrségi szirénánál szirénahang is szól.
 - A lezárt sávba hajtás után három egymást követő, a műhelyben kiválasztott tantárgyakból érkező feladatot kell megoldani.
