@@ -18,6 +18,7 @@ class LearningTask:
     subject: str = "MATEK"
     pronunciation: str | None = None
     choices_in_english: bool = False
+    requires_keyboard_input: bool = False
 
 
 class EnglishTaskGenerator:

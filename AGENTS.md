@@ -50,6 +50,7 @@ Az agent munkarendje:
 - tudasjargany/learning/: tanulási modulok:
   - tasks.py: közös LearningTask modell és angol feladatok;
   - math_tasks.py: összeadásos és kivonásos feladatok;
+  - hungarian_tasks.py: magyar ábécérendes, billentyűzetes betűpótlás;
   - manager.py: a tantárgyak sorrendje és váltása.
 - tudasjargany/services/:
   - speech.py: offline angol kiejtés;
@@ -110,7 +111,7 @@ Az extrák nélkül is el lehet indulni. Vezetés közben csak a ténylegesen fe
 ## Feladat- és jutalmazási szabályok
 
 - Minden egyes feladatra 30 másodperc áll rendelkezésre.
-- A műhely Feladatok menüjében alapból csak a Matek aktív; Angol bekapcsolásakor a kiválasztott tantárgyak felváltva érkeznek.
+- A műhely Feladatok menüjében alapból csak a Matek aktív; az Angol és a Magyar külön bekapcsolható, a kiválasztott tantárgyak pedig felváltva érkeznek.
 - Az utolsó 10 másodpercben a visszaszámláló piros.
 - Ütközéshez tartozó helyes válasz: nincs életvesztés, és nem jár csillag.
 - Ütközéshez tartozó hibás válasz: egy élet levonása, majd újrapróbálható a feladat, ha maradt élet.
@@ -128,7 +129,7 @@ Az extrák nélkül is el lehet indulni. Vezetés közben csak a ténylegesen fe
   - hiányzó bal oldali szám: `? − 7 = 12`;
   - hiányzó jobb oldali szám: `18 − ? = 11`;
   - hiányzó műveleti jel: `8 ? 6 = 14`.
-- A válaszokat nagy, egérrel kattintható gombokkal kell megadni.
+- A válaszokat általában nagy, egérrel kattintható gombokkal kell megadni. A Magyar ábécéfeladatnál a hiányzó betűt billentyűzettel kell beírni, majd Enterrel vagy az Ellenőrzés gombbal elküldeni.
 
 ## Többtantárgyas feladatrendszer
 
@@ -148,8 +149,9 @@ A jelenlegi modulok:
 
 - `tudasjargany/learning/math_tasks.py`: 30-as számkörbeli összeadás és kivonás;
 - `tudasjargany/learning/tasks.py`: angol–magyar alap szókincs;
+- `tudasjargany/learning/hungarian_tasks.py`: három egymást követő magyar ábécébetűből hiányzó betű beírása;
 - `tudasjargany/services/speech.py`: az angol szavak fölé vitt egérhez tartozó offline kiejtés;
-- `tudasjargany/learning/manager.py`: alapból Matek, Angol bekapcsolásakor `MATEK → ANGOL` váltás.
+- `tudasjargany/learning/manager.py`: alapból Matek; az Angol és Magyar bekapcsolásakor a kiválasztott tantárgyak sorrendben váltakoznak.
 
 Új tantárgy hozzáadásakor készíts egy `next_task()` metódusú generátort, amely `LearningTask` objektumot ad vissza, majd regisztráld a tudasjargany/learning/manager.py TaskManager tantárgysorrendjében. Így később a magyar nyelvtan, irodalom vagy szövegértés a feladatablak átírása nélkül bővíthető.
 

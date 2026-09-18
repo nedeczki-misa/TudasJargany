@@ -149,6 +149,7 @@ class TudasJarganyGame(tk.Tk):
         self.subject_vars = {
             "MATEK": tk.BooleanVar(value=True),
             "ANGOL": tk.BooleanVar(value=False),
+            "MAGYAR": tk.BooleanVar(value=False),
         }
         self.settings_popup: tk.Toplevel | None = None
         self.english_speaker = EnglishSpeaker()
@@ -471,7 +472,7 @@ class TudasJarganyGame(tk.Tk):
         popup = tk.Toplevel(self)
         self.settings_popup = popup
         popup.title("Feladatok be\u00e1ll\u00edt\u00e1sa")
-        popup.geometry("440x330")
+        popup.geometry("440x365")
         popup.resizable(False, False)
         popup.configure(bg="#FFF7D1")
         popup.transient(self)
@@ -490,6 +491,7 @@ class TudasJarganyGame(tk.Tk):
         for subject, detail in (
             ("MATEK", "\u00d6sszead\u00e1s \u00e9s kivon\u00e1s 30-as sz\u00e1mk\u00f6rben"),
             ("ANGOL", "Alap angol-magyar szavak kiejt\u00e9ssel"),
+            ("MAGYAR", "Ábécé: hiányzó betű beírása billentyűzettel"),
         ):
             tk.Checkbutton(
                 choices, text=f"{subject} - {detail}", variable=self.subject_vars[subject],
@@ -1746,7 +1748,7 @@ class TudasJarganyGame(tk.Tk):
         popup = tk.Toplevel(self)
         self.math_popup = popup
         popup.title(task_title.title())
-        popup.geometry("510x470")
+        popup.geometry("510x500")
         popup.resizable(False, False)
         popup.configure(bg="#FFF7D1")
         popup.transient(self)
@@ -1764,9 +1766,10 @@ class TudasJarganyGame(tk.Tk):
         if self.challenge_tasks_left > 1 or self.challenge_title.startswith("3"):
             solved = 3 - self.challenge_tasks_left
             progress_text = f"  ({solved + 1}/3. feladat)"
+        answer_instruction = "Írd be a hiányzó betűt, majd nyomj Entert!" if task.requires_keyboard_input else "Válaszd ki a helyes választ!"
         tk.Label(
             popup,
-            text=f"{self.challenge_reason}{progress_text}\nVálaszd ki a helyes választ!",
+            text=f"{self.challenge_reason}{progress_text}\n{answer_instruction}",
             font=("Arial", 12), bg="#FFF7D1", fg=INK, wraplength=460,
         ).pack(pady=(0, 8))
         timer_label = tk.Label(
@@ -1796,31 +1799,54 @@ class TudasJarganyGame(tk.Tk):
         answers = tk.Frame(popup, bg="#FFF7D1")
         answers.pack(pady=20)
         feedback = tk.Label(
-            popup, text="Kattints a helyes válaszra!",
+            popup, text="Írd be a betűt, majd nyomj Entert!" if task.requires_keyboard_input else "Kattints a helyes válaszra!",
             font=("Arial", 12, "bold"), bg="#FFF7D1", fg="#526D7A",
             wraplength=460, justify="center",
         )
         feedback.pack()
         buttons: list[tk.Button] = []
-        for choice in task.choices:
-            button = tk.Button(
-                answers, text=choice, font=("Arial", 20, "bold"),
+        if task.requires_keyboard_input:
+            answer_entry = tk.Entry(
+                answers, font=("Arial", 25, "bold"), width=7,
+                justify="center", relief="solid", borderwidth=2,
+            )
+            answer_entry.pack(side="left", padx=(0, 10))
+            submit_button = tk.Button(
+                answers, text="ELLENŐRZÉS", font=("Arial", 13, "bold"),
                 bg="#4FA3F7", fg="white", activebackground="#75B8F8",
-                activeforeground="white", relief="flat", width=4, pady=8,
-                cursor="hand2"
+                activeforeground="white", relief="flat", padx=14, pady=10,
+                cursor="hand2",
             )
-            button.configure(
-                command=lambda value=choice, widget=button: self._check_learning_answer(
-                    value, widget, buttons, feedback, task, popup
+            submit_button.configure(
+                command=lambda: self._check_learning_answer(
+                    answer_entry.get().strip().upper().replace(" ", ""), submit_button,
+                    buttons, feedback, task, popup,
                 )
             )
-            button.pack(side="left", padx=8)
-            buttons.append(button)
-            if task.subject == "ANGOL" and task.choices_in_english:
-                button.bind(
-                    "<Enter>",
-                    lambda _event, word=choice: self._speak_english_word(word),
+            submit_button.pack(side="left")
+            buttons.append(submit_button)
+            answer_entry.bind("<Return>", lambda _event: submit_button.invoke())
+            answer_entry.focus_set()
+        else:
+            for choice in task.choices:
+                button = tk.Button(
+                    answers, text=choice, font=("Arial", 20, "bold"),
+                    bg="#4FA3F7", fg="white", activebackground="#75B8F8",
+                    activeforeground="white", relief="flat", width=4, pady=8,
+                    cursor="hand2"
                 )
+                button.configure(
+                    command=lambda value=choice, widget=button: self._check_learning_answer(
+                        value, widget, buttons, feedback, task, popup
+                    )
+                )
+                button.pack(side="left", padx=8)
+                buttons.append(button)
+                if task.subject == "ANGOL" and task.choices_in_english:
+                    button.bind(
+                        "<Enter>",
+                        lambda _event, word=choice: self._speak_english_word(word),
+                    )
         popup.protocol(
             "WM_DELETE_WINDOW",
             lambda: feedback.configure(text="Előbb válassz egy választ!", fg="#D14B3E")

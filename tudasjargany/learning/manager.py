@@ -4,22 +4,25 @@ from __future__ import annotations
 
 from .tasks import EnglishTaskGenerator, LearningTask
 from .math_tasks import MathTaskGenerator
+from .hungarian_tasks import HungarianAlphabetTaskGenerator
 
 
 class TaskManager:
     """Felvaltva ad matek- es angolfeladatot; uj targy itt bovitheto."""
 
-    AVAILABLE_SUBJECTS = ("MATEK", "ANGOL")
+    AVAILABLE_SUBJECTS = ("MATEK", "ANGOL", "MAGYAR")
 
     def __init__(
         self,
         math_generator: MathTaskGenerator | None = None,
         english_generator: EnglishTaskGenerator | None = None,
         enabled_subjects: tuple[str, ...] = ("MATEK",),
+        hungarian_generator: HungarianAlphabetTaskGenerator | None = None,
     ) -> None:
         self.generators = {
             "MATEK": math_generator or MathTaskGenerator(),
             "ANGOL": english_generator or EnglishTaskGenerator(),
+            "MAGYAR": hungarian_generator or HungarianAlphabetTaskGenerator(),
         }
         self.enabled_subjects: tuple[str, ...] = ()
         self.next_subject_index = 0
