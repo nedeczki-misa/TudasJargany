@@ -11,7 +11,7 @@ Egyszerű, színes Python/Tkinter játék gyerekeknek.
 5. Húzd az alkatrészeket az azonos alakú, szaggatott helyükre. A kerekek, lámpa és lökhárító mellett külön légterelőt és vonóhorgot is fel lehet szerelni.
 6. Ha minden kötelező elem a helyén van, kattints az **INDULÁS!** gombra.
 7. Az utcán gyűjtsd össze a csillagokat, és kerüld ki az akadályokat.
-8. A műhely alsó sávjában kattints a **FELADATOK** gombra. A Matek alapból be van jelölve, az Angol és a Magyar kikapcsolva. Jelöld be azt is, amit gyakorolni szeretnél.
+8. A műhely alsó sávjában kattints a **FELADATOK** gombra. A Matek alapból be van jelölve, az Angol és a Magyar kikapcsolva. Jelöld be azt is, amit gyakorolni szeretnél; a Mentés gombbal rögzített választás a következő indításkor is megmarad.
 9. Ha az autó akadálynak ütközik, megnyílik a **Tudás-szerviz**. Minden kérdésre 30 másodperc áll rendelkezésre. Helyes válasz után élet- és csillagváltozás nélkül folytatódik a vezetés.
 
 A Matek alapértelmezett feladatként összeadást és kivonást gyakoroltat a 30-as számkörben. Ha az Angol is be van jelölve, alap angol–magyar szavak is érkeznek, például `apple` = alma vagy kutya = `dog`. A Magyar ábécéfeladat három egymást követő betűből egyet elrejt, például `A  Á  ?`; a hiányzó betűt billentyűzettel kell beírni. A bekapcsolt tantárgyak felváltva jelennek meg.

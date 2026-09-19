@@ -54,7 +54,8 @@ Az agent munkarendje:
   - manager.py: a tantárgyak sorrendje és váltása.
 - tudasjargany/services/:
   - speech.py: offline angol kiejtés;
-  - scoreboard.py: helyi TOP 10 ranglista és eredménymentés.
+  - scoreboard.py: helyi TOP 10 ranglista és eredménymentés;
+  - settings.py: helyi, induláskor betöltődő feladatbeállítások.
 - tudasjargany/legacy/wordsearch.py: a megmaradt szókeresős prototípus.
 - tests/: minden automatikus teszt, a forrásmappáktól elkülönítve.
 - assets/sounds/: a játék eredeti WAV hangcsomagja.
@@ -111,7 +112,7 @@ Az extrák nélkül is el lehet indulni. Vezetés közben csak a ténylegesen fe
 ## Feladat- és jutalmazási szabályok
 
 - Minden egyes feladatra 30 másodperc áll rendelkezésre.
-- A műhely Feladatok menüjében alapból csak a Matek aktív; az Angol és a Magyar külön bekapcsolható, a kiválasztott tantárgyak pedig felváltva érkeznek.
+- A műhely Feladatok menüjében alapból csak a Matek aktív; az Angol és a Magyar külön bekapcsolható, a kiválasztott tantárgyak pedig felváltva érkeznek. A Mentés gomb a választást helyben eltárolja, ezért a következő indításkor is ugyanazok a tantárgyak aktívak.
 - Az utolsó 10 másodpercben a visszaszámláló piros.
 - Ütközéshez tartozó helyes válasz: nincs életvesztés, és nem jár csillag.
 - Ütközéshez tartozó hibás válasz: egy élet levonása, majd újrapróbálható a feladat, ha maradt élet.

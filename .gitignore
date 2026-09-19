@@ -1,3 +1,4 @@
 # Helyi, személyes fejlesztői utasítások – nem kerülnek a távoli tárba.
 __pycache__
 eredmenyek.json
+beallitasok.json

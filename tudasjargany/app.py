@@ -20,6 +20,7 @@ from .learning.tasks import LearningTask
 from .learning.manager import TaskManager
 from .services.speech import EnglishSpeaker
 from .services.scoreboard import load_top_scores, save_result
+from .services.settings import load_enabled_subjects, save_enabled_subjects
 
 
 BG = "#EAF7FF"
@@ -145,11 +146,11 @@ class TudasJarganyGame(tk.Tk):
         self.last_coloring_animal: str | None = None
         self.message = ""
         self.message_frames = 0
-        self.task_manager = TaskManager()
+        saved_subjects = load_enabled_subjects(TaskManager.AVAILABLE_SUBJECTS)
+        self.task_manager = TaskManager(enabled_subjects=saved_subjects)
         self.subject_vars = {
-            "MATEK": tk.BooleanVar(value=True),
-            "ANGOL": tk.BooleanVar(value=False),
-            "MAGYAR": tk.BooleanVar(value=False),
+            subject: tk.BooleanVar(value=subject in saved_subjects)
+            for subject in TaskManager.AVAILABLE_SUBJECTS
         }
         self.settings_popup: tk.Toplevel | None = None
         self.english_speaker = EnglishSpeaker()
@@ -521,6 +522,7 @@ class TudasJarganyGame(tk.Tk):
             feedback.configure(text="V\u00e1lassz legal\u00e1bb egy tant\u00e1rgyat!", fg="#D14B3E")
             return
         self.task_manager = TaskManager(enabled_subjects=selected)
+        save_enabled_subjects(selected)
         selected_names = ", ".join(subject.title() for subject in selected)
         self.status.configure(text=f"Feladatok: {selected_names}", fg="#238636")
         self._close_task_settings(popup)
