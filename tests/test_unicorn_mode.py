@@ -11,6 +11,11 @@ class UnicornModeTests(unittest.TestCase):
                 TudasJarganyGame._random_road_kind(unicorn=True),
                 "unicorn_star",
             )
+        with patch("main.random.random", return_value=0.81):
+            self.assertEqual(
+                TudasJarganyGame._random_road_kind(unicorn=True),
+                "unicorn_star",
+            )
         with patch("main.random.random", return_value=0.99):
             self.assertEqual(
                 TudasJarganyGame._random_road_kind(unicorn=True),

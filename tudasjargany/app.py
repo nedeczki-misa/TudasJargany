@@ -1239,7 +1239,7 @@ class TudasJarganyGame(tk.Tk):
     def _random_road_kind(helicopter: bool = False, unicorn: bool = False) -> str:
         roll = random.random()
         if unicorn:
-            return "unicorn_star" if roll < 0.72 else "unicorn_dragon"
+            return "unicorn_star" if roll < 0.82 else "unicorn_dragon"
         if helicopter:
             if roll < 0.58:
                 return "star"
@@ -1368,7 +1368,8 @@ class TudasJarganyGame(tk.Tk):
                         # A gyorsulási üzenetet itt rögtön megjelenítjük.
                         self.speed_just_increased = False
                 elif item["kind"] == "unicorn_dragon":
-                    self.message, self.message_frames = "🐉 KERÜLD KI A SÁRKÁNYT!", 35
+                    self.pending_coloring_challenges += 1
+                    self.message, self.message_frames = "🐉 🎨 SÁRKÁNYRAJZ!", 35
                 else:
                     hit_obstacle = str(item["kind"])
                     self._slow_down_after_collision(hit_obstacle)
